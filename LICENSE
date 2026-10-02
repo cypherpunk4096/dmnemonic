@@ -1,0 +1,13 @@
+dmnemonic is dual-licensed by component.
+
+Client side: the browser encryption engine and page
+  src/core.js, src/ui.html, dmnemonic.html, dist/*
+  GNU General Public License v3.0 or later (GPL-3.0-or-later). See LICENSE-GPL-3.0.
+
+Backend: the command-line tool, helpers, build, tests, vectors and docs
+  dmnemonic.py, tools/pqaddr/*, build.py, tests/*, vectors.json, docs/*
+  MIT License (MIT). See LICENSE-MIT.
+
+Each source file carries an SPDX-License-Identifier line naming its license.
+
+Copyright (C) 2026 Professor Codephreak and the cypherpunk4096 contributors.

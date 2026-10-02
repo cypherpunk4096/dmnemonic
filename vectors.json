@@ -1,0 +1,45 @@
+{
+  "sha512_256_abc": "53048e2681941ef99b2e29b76b4c7dabe4c2d0c634fc6d46e0e2f13107e7af23",
+  "accounts": [
+    {
+      "seed": "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60",
+      "pub": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+      "address": "25NJQAMCWEFLPVKL73J4SZAHHIHOC4XT3KTCGJNPAINGR5YHKENMEF5QTE",
+      "dmnemonic": "crisp sheriff solution ten remove object chair enhance future rather biology era myth image swap crash coffee scatter buffalo depart day twist advance about unfair",
+      "demonic": "cernunloch aetherfinn thelemator rubedovash azothlir babalonmor dagdahael tuathrin imbasrin goetiapra imbolcquor annwnroth zacarrin sluacor albedoyth cernunquor manannbal umbrazael brigidgoth machator machamor paimoncarn draoifael draoizael vassagogal"
+    },
+    {
+      "seed": "4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb",
+      "pub": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c",
+      "address": "HVABPQ7IIOEVVEVXBKTU2G36XSOJQLGPF3CJNDGAZVK7CKXUMYGA6EOE6Y",
+      "dmnemonic": "praise case eternal verb combine issue reject senior match element poem rail believe small provide private network hammer edit term panther puppy tag abstract bone",
+      "demonic": "tetrafinn morriganxas annwnfinn astarothrin manannlir fomorsul azothkiel umbraloch vorsgvex geisloch aglawyr goetiakiel imbolcdun thelemazael sigilkiel tetraxas iadvex ceothar geisquor rubedozor hekasseth sigilmael rubedobal draoikiel lughcor"
+    }
+  ],
+  "coven": {
+    "seed": "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60",
+    "k": 3,
+    "n": 5,
+    "coeffs": [
+      "202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+      "404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f"
+    ],
+    "shards": [
+      "dagdanach fiachloch geismor lilitvash albedokiel fomorbal zorgemor dagdator nuadavash awenrin cernunseth dagdapra tuathpra awenpra ceocor albedoroth awenmael morriganbal dubhlir manannfinn fiachvex baelvex astarothcarn draoikiel draoimor thelemacor",
+      "dagdaroth babalonvex babalonkiel caoinquor vorsgtor nuadazor tuathpra annwnrin manannlir cernunsul caoincarn tetrahael baelseth paimonkiel fiachthar umbrator imbolcyth ogamvex vassagovex babalonxas nuadasul brigidmael mananntor ourobwyr draoizael belialkiel",
+      "dagdazael iadvex lughdrim nemetonpra gohovex paimonloch awenpra annwnfinn annwnfinn fiachsul qliphmael babalonlir lilithael nuadanach dagdathar umbrahael fomorxas sidhevex anamcor tetrawyr mananndun rubedotor badbtor ourobmor draoimor vorsgrin",
+      "dagdathar manannneth nigredoquor aglasul nemetonbal hekasdun lumennach qliphloch mananntor athamethar zacarneth samhainzael fiachpra nigredolir iadsul qliphwyr umbrafinn nemetonvex hekaswyr hekasnach vorsgbal azothpra fiachyth albedothar draoimor umbrasul",
+      "dagdadun morriganneth nemetonfael iadrin awenxas imbaszael abraxnach qliphdun annwnsul rubedothar beltanloch fiachroth macharoth imbolcbal gohosul qliphmor abraxlir filivex brigidrin sigilmor gohoxas fomorrin dagdayth albedocarn draoizael morriganhael"
+    ]
+  },
+  "quantum": {
+    "source": "go-algorand cmd/algokey/pq_test.go TestPQGenerateUsesMnemonicSizedEntropy",
+    "scheme": "f1",
+    "entropy": "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20",
+    "dmnemonic": "dizzy army link gate asthma dragon expect arch pave deal always baby category age post bid actual good minimum script demand shy abstract ability move",
+    "demonic": "dubhnach samhainmor zorgemael cailleachroth samhainmael dubhmael awenroth ogamwyr abraxfinn machanach sidhecarn beltangal dagdanach sidhevex tetradun imbolcmael draoivash caoinzael gohogal umbragoth machaneth aethercarn draoikiel draoinach zacarvex",
+    "falcon_seed": "ff681836d409831e7a16231bfcf1fca8e0a27b17a2389ff76ce1a7232af4609a",
+    "pq_address": "ZEJ4BLG3XWAUUZQGCEDJLYIC6D2NCWHRSX5DJMDPE54PXXR7G3PCQTARXU",
+    "salt": 5
+  }
+}

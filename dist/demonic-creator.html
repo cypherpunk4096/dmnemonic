@@ -1,0 +1,666 @@
+<!--
+  dmnemonic — Algorand keys in the dmnemonic and demonic tongues
+  Copyright (C) 2026 Professor Codephreak and the cypherpunk4096 contributors
+  SPDX-License-Identifier: GPL-3.0-or-later
+
+  This program is free software: you can redistribute it and/or modify it under
+  the terms of the GNU General Public License as published by the Free Software
+  Foundation, either version 3 of the License, or (at your option) any later
+  version. It is distributed WITHOUT ANY WARRANTY; see LICENSE-GPL-3.0.
+  Client-side component, GPL-3.0-or-later.
+-->
+<title>dmnemonic Creator</title>
+<style>
+/* Layout: one narrow altar column; the ritual reads top to bottom: summon → seal → share. */
+:root {
+  --bg: #0d0a0c; --panel: #17111a; --line: #3a2731; --ink: #e9dfd2; --muted: #a39389;
+  --blood: #d23a55; --ember: #e3a64a; --rune: #8fc1ad; --well: #0f0b10; --on-blood: #fff;
+  --serif: "Palatino Linotype", Palatino, "Book Antiqua", "URW Palladio L", Georgia, serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #efe8dc; --panel: #f9f4ea; --line: #d6c4a8; --ink: #2a1c18; --muted: #6f5f56;
+    --blood: #9b1c33; --ember: #8a560f; --rune: #2b6853; --well: #efe4d1; --on-blood: #fff;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #efe8dc; --panel: #f9f4ea; --line: #d6c4a8; --ink: #2a1c18; --muted: #6f5f56;
+  --blood: #9b1c33; --ember: #8a560f; --rune: #2b6853; --well: #efe4d1; --on-blood: #fff;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.55 var(--serif); }
+.wrap { max-width: 1040px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 72px; }
+header { text-align: center; }
+header h1 { font-size: clamp(28px, 6vw, 50px); letter-spacing: .14em; margin: 0; font-weight: 600; text-transform: uppercase; text-wrap: balance; }
+header h1 span { color: var(--blood); }
+header h1 .name { text-transform: none; letter-spacing: .06em; font-weight: 600; }
+header p { color: var(--muted); margin: 6px auto 0; max-width: 62ch; font-style: italic; }
+.status { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; margin: 14px 0 0; }
+.chip { font: 13px/1.4 var(--mono); white-space: nowrap; padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); }
+.chip.is-good { color: var(--rune); border-color: var(--rune); }
+.chip.is-bad { color: var(--blood); border-color: var(--blood); }
+.chip.is-warn { color: var(--ember); border-color: var(--ember); }
+nav { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 18px 0 22px; }
+nav button { font: 600 14px var(--serif); letter-spacing: .12em; text-transform: uppercase; background: none; color: var(--muted);
+  border: 1px solid var(--line); padding: 8px 14px; border-radius: 2px; cursor: pointer; }
+nav button[aria-selected="true"] { color: var(--ink); border-color: var(--blood); background: color-mix(in srgb, var(--blood) 12%, transparent); }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+section { display: none; } section.on { display: block; }
+.panel { background: var(--panel); border: 1px solid var(--line); padding: 20px; border-radius: 3px; margin-bottom: 16px; min-width: 0; }
+h2 { font-size: 22px; letter-spacing: .08em; margin: 0 0 10px; font-weight: 600; text-wrap: balance; }
+h3 { font-size: 14px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 20px 0 8px; font-weight: 600; }
+p { max-width: 70ch; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+label { color: var(--muted); font-size: 15px; }
+input, textarea, select { font: 15px var(--mono); background: var(--well); color: var(--ink); border: 1px solid var(--line); border-radius: 2px; padding: 8px 10px; }
+textarea { width: 100%; min-height: 96px; resize: vertical; }
+input[type=number] { width: 70px; }
+input[type=text] { flex: 1 1 220px; min-width: 0; }
+.btn { font: 600 15px var(--serif); letter-spacing: .14em; text-transform: uppercase; color: var(--on-blood); background: var(--blood); border: 0; padding: 10px 20px; border-radius: 2px; cursor: pointer; }
+.btn.ghost { background: none; color: var(--ink); border: 1px solid var(--line); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
+.seg button { font: 14px var(--serif); background: none; color: var(--muted); border: 0; padding: 8px 12px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--line); color: var(--ink); }
+.ident { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 6px 14px; align-items: center; }
+.ident .k { color: var(--muted); font-size: 13px; letter-spacing: .12em; text-transform: uppercase; }
+.ident .v { font: 14px var(--mono); overflow-wrap: anywhere; color: var(--ember); }
+.twin { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 760px) { .twin { grid-template-columns: minmax(0, 1fr); } .ident { grid-template-columns: minmax(0, 1fr); } }
+ol.words { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; counter-reset: w; }
+ol.words li { counter-increment: w; font: 15px var(--mono); background: var(--well); border: 1px solid var(--line); padding: 6px 8px 6px 34px; position: relative; border-radius: 2px; min-width: 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+ol.words li::before { content: counter(w); position: absolute; left: 8px; color: var(--muted); font-size: 12px; top: 8px; }
+ol.words li small { display: block; font: italic 13px var(--serif); color: var(--muted); }
+ol.words li.chk { border-color: var(--ember); }
+.demonic ol.words li { color: var(--rune); }
+.veiled ol.words li, .veiled .shard-text { filter: blur(7px); user-select: none; }
+.veiled ol.words li::before { filter: none; }
+.hint { color: var(--muted); font-size: 15px; }
+.err { color: var(--blood); font-weight: 600; }
+.ok { color: var(--rune); font-weight: 600; }
+.shard { font: 14px var(--mono); background: var(--well); border: 1px solid var(--line); padding: 10px; margin: 8px 0; overflow-wrap: anywhere; border-radius: 2px; }
+.shard b { font-family: var(--serif); color: var(--ember); letter-spacing: .1em; }
+.sigil { display: flex; justify-content: center; margin: 0 0 10px; }
+.sigil svg { width: 170px; height: 170px; max-width: 100%; }
+.bits { font: 13px var(--mono); overflow-x: auto; background: var(--well); padding: 12px; border: 1px solid var(--line); white-space: pre; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+td, th { border-bottom: 1px solid var(--line); padding: 4px 8px; text-align: left; }
+td.m { font-family: var(--mono); font-size: 14px; color: var(--rune); }
+td.n { font-variant-numeric: tabular-nums; color: var(--muted); }
+.lex { max-height: 460px; overflow: auto; }
+.warn { border-left: 3px solid var(--blood); padding: 8px 12px; background: color-mix(in srgb, var(--blood) 8%, transparent); margin: 12px 0; }
+.quiz { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin: 10px 0; }
+.quiz label { display: grid; gap: 4px; }
+.quiz input { width: 100%; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-bottom: 12px; }
+footer { text-align: center; color: var(--muted); font-size: 14px; margin-top: 30px; }
+.copy { margin-left: auto; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+<header>
+  <h1>⛧ <b class="name">dmnemonic</b> <span>Creator</span> ⛧</h1>
+  <p>Algorand keys in two tongues: the plain <b>dmnemonic</b> and the <b>demonic</b> grimoire of Gaelic roots and summoning names. Both name the same key and the same account.</p>
+  <div class="status" aria-live="polite">
+    <span class="chip" id="st-test">self-test: running…</span>
+    <span class="chip" id="st-net">network: …</span>
+    <span class="chip" id="st-ctx">context: …</span>
+  </div>
+</header>
+
+<nav role="tablist">
+  <button data-tab="summon" aria-selected="true">Summon</button>
+  <button data-tab="reveal" aria-selected="false">Reveal &amp; Translate</button>
+  <button data-tab="coven" aria-selected="false">Coven</button>
+  <button data-tab="lore" aria-selected="false">Lore</button>
+  <button data-tab="grimoire" aria-selected="false">Grimoire</button>
+</nav>
+
+<div class="toolbar">
+  <button class="btn ghost" id="veil" aria-pressed="true">Show words</button>
+  <button class="btn ghost" id="banish">Banish all</button>
+</div>
+
+<section id="summon" class="on">
+  <div class="panel">
+    <div class="row">
+      <div class="seg" id="mode">
+        <button aria-pressed="true" data-v="ed">Account · ed25519</button>
+        <button aria-pressed="false" data-v="pq">Quantum · Falcon-1024</button>
+      </div>
+      <input type="text" id="incant" placeholder="optional incantation (extra entropy, mixed in)" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button class="btn" id="go" disabled>Summon</button>
+    </div>
+    <p class="hint" id="modehint">An Algorand ed25519 account. The dmnemonic imports into Pera, Defly, goal and algosdk. The demonic phrase is the same 25 indices in the grimoire tongue.</p>
+  </div>
+  <div id="out">
+    <div class="panel">
+      <h2>The ritual</h2>
+      <p class="hint">Summon forges 256 bits from your browser's cryptographic random generator. Words stay blurred until you choose <b>Show words</b>. Write them on paper, then prove it in the <b>Seal</b> step. <b>Banish all</b> wipes everything, and the page does it on its own after 5 idle minutes.</p>
+      <p class="hint">Nothing here touches the network or browser storage. For real funds, open the standalone file on an offline machine.</p>
+    </div>
+  </div>
+</section>
+
+<section id="reveal">
+  <div class="panel">
+    <h2>Reveal &amp; Translate</h2>
+    <p class="hint">Paste a phrase in either tongue: 25 words, or a 26-word coven shard. Unique prefixes work (4+ letters for dmnemonic, 6+ for demonic), and typos get a suggestion.</p>
+    <textarea id="rin" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="paste a phrase"></textarea>
+    <div class="row" style="margin-top:10px"><button class="btn" id="rgo" disabled>Reveal</button><label><input type="checkbox" class="pqbox" id="rpq"> post-quantum master phrase</label></div>
+    <div id="rout"></div>
+  </div>
+</section>
+
+<section id="coven">
+  <div class="panel">
+    <h2>Split into a coven</h2>
+    <p class="hint">Shamir secret sharing over GF(256). The key becomes <i>n</i> shards. Any <i>k</i> of them rebuild it, and fewer than <i>k</i> reveal nothing at all. Give each shard to a different keeper in a different place.</p>
+    <textarea id="sin" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="a 25-word phrase in either tongue"></textarea>
+    <div class="row" style="margin-top:10px">
+      <label for="sk">threshold</label><input type="number" id="sk" value="3" min="2" max="15">
+      <label for="sn">shards</label><input type="number" id="sn" value="5" min="2" max="15">
+      <label for="st">tongue</label><select id="st"><option value="demonic">demonic</option><option value="dmnemonic">dmnemonic</option></select>
+      <label><input type="checkbox" class="pqbox" id="spq"> post-quantum</label>
+      <button class="btn" id="sgo" disabled>Split</button>
+    </div>
+    <div id="sout"></div>
+  </div>
+  <div class="panel">
+    <h2>Bind the coven</h2>
+    <p class="hint">One shard per line, in either tongue and any order. Extra shards are cross-checked, so shards from two different covens are caught.</p>
+    <textarea id="bin" autocomplete="off" autocapitalize="off" spellcheck="false" style="min-height:140px"></textarea>
+    <div class="row" style="margin-top:10px"><button class="btn" id="bgo" disabled>Bind</button><label><input type="checkbox" class="pqbox" id="bpq"> post-quantum master phrase</label></div>
+    <div id="bout"></div>
+  </div>
+</section>
+
+<section id="lore">
+  <div class="panel">
+    <h2>How a mnemonic is made</h2>
+    <p>A mnemonic is a key written as words. The words carry no meaning. Each one stands for an 11-bit number, because 2<sup>11</sup> = 2048 is the size of the wordlist.</p>
+    <h3>BIP-39 (Bitcoin, Ethereum)</h3>
+    <p>128–256 bits of entropy plus a few SHA-256 checksum bits are cut into 11-bit groups, giving 12–24 words. The phrase then runs through PBKDF2-HMAC-SHA512 (2048 rounds, salt <code>"mnemonic"</code> + passphrase) to make a 64-byte seed, and BIP-32/44 derive a tree of keys from it.</p>
+    <h3>Algorand</h3>
+    <p>Algorand uses the same English wordlist but skips the KDF and the tree. The phrase <i>is</i> the 32-byte ed25519 seed:</p>
+    <div class="bits">seed  = 32 random bytes                                  (256 bits)
+words = seed packed into 11-bit numbers, little-endian    → 24 words (264 bits; last 8 are zero)
+check = SHA-512/256(seed)[0:2] → low 11 bits              → word 25
+pub   = Ed25519(seed)
+addr  = base32( pub ‖ SHA-512/256(pub)[-4:] )              → 58 characters</div>
+    <p>One phrase means one account. Change a word and the checksum word stops matching (except for a 1-in-2048 fluke), which is how typos get caught.</p>
+    <h3>The two tongues</h3>
+    <p><b>dmnemonic</b> is the standard Algorand phrase. Its decentralized side is the coven: a k-of-n Shamir split of the seed, so custody is spread across keepers and no single one of them can move the funds.</p>
+    <p><b>demonic</b> swaps the wordlist for the grimoire. Each 11-bit index splits into a 6-bit <i>root</i> (64 Old Irish, Welsh and Gaulish names of gods, feasts and ogham trees, plus Enochian, Goetic and alchemical names) and a 5-bit <i>ending</i> (32 Gaelic words such as <i>mór</i> “great”, <i>dún</i> “fortress” and <i>lir</i> “sea”, plus invocatory endings). <code>draoi</code> + <code>mor</code> = <code>draoimor</code>, “druid · great”. Indices, checksum and address are identical to the dmnemonic phrase, so translating back always recovers the real account.</p>
+    <h3>Quantum mode</h3>
+    <p>Since consensus v42, Algorand has native post-quantum accounts signed with <b>Falcon-1024</b> (scheme tag <code>f1</code>), a NIST-selected lattice signature built to resist quantum attack. The backup is the same kind of 25-word phrase, holding 256 bits of master entropy. go-algorand turns it into keys like this:</p>
+    <div class="bits">falcon seed = SHA-512/256("PQK" ‖ "f1" ‖ entropy)
+pk, sk      = Falcon-1024 deterministic keygen(falcon seed)
+salt        = lowest 0…255 whose address is NOT an Ed25519 point
+address     = SHA-512/256("PQA" ‖ "f1" ‖ salt ‖ pk)</div>
+    <p>This page makes, translates and shards the PQ master phrase and computes its Falcon seed. Falcon key generation is too large to write inline, so for the address use the <code>tools/pqaddr</code> helper from the repository, or <code>algokey pq import -m "&lt;dmnemonic phrase&gt;"</code>. The helper reproduces go-algorand's own test vector.</p>
+    <p><b>Never import a PQ master phrase into an ed25519 wallet.</b> The same 25 words are also a valid ed25519 seed. If that ed25519 key ever signs on-chain, its public key is exposed, and a quantum attacker could recover the entropy and with it the Falcon key.</p>
+    <h3>What protects you here</h3>
+    <ul>
+      <li>Known-answer self-test at load (RFC 8032 Ed25519, SHA-512/256, Algorand mnemonic and address from algosdk, grimoire and coven vectors). If any check fails, every button that makes or reads keys stays disabled.</li>
+      <li>Randomness comes only from <code>crypto.getRandomValues</code>. An incantation is hashed into it and can never replace it.</li>
+      <li>Words are blurred by default. Inputs turn off autocomplete and spellcheck, since some browsers send spellcheck text to a server.</li>
+      <li>No network requests, no storage. Banish zeroes the key bytes and clears the page, and does so on its own after 5 idle minutes.</li>
+      <li>The address sigil is drawn from the public key, so showing it reveals nothing secret.</li>
+    </ul>
+    <div class="warn">Wallets only understand the dmnemonic tongue. Keep a way to translate back: the standalone file, the Python tool, or a printed grimoire table. Anyone with either phrase, or with <i>k</i> shards, owns the account. This code has not had an external audit.</div>
+  </div>
+</section>
+
+<section id="grimoire">
+  <div class="panel">
+    <h2>The grimoire · 2048 words</h2>
+    <div class="row"><input type="text" id="lq" placeholder="search a word, root or meaning" autocomplete="off" spellcheck="false"></div>
+    <div class="lex" style="margin-top:10px"><table><thead><tr><th>#</th><th>word</th><th>meaning</th><th>dmnemonic</th></tr></thead><tbody id="lt"></tbody></table></div>
+  </div>
+</section>
+
+<footer>Engine: SHA-512/256, Ed25519 and Shamir written inline and checked bit-for-bit against algosdk · <span id="build"></span></footer>
+</div>
+
+<script>
+const ROOTS=[["draoi", "druid"], ["sidhe", "folk of the mounds"], ["ogam", "tree-script"], ["samhain", "summer's end"], ["beltan", "bright fire"], ["imbolc", "ewe's milk feast"], ["lugh", "the many-skilled"], ["brigid", "the exalted"], ["morrigan", "phantom queen"], ["dagda", "the good god"], ["nuada", "silver hand"], ["manann", "lord of the sea"], ["cernun", "the horned one"], ["badb", "battle crow"], ["macha", "sovereignty"], ["fiach", "raven"], ["dubh", "black"], ["geis", "sacred taboo"], ["tuath", "the people"], ["annwn", "the otherworld"], ["awen", "flowing spirit"], ["nemeton", "sacred grove"], ["fili", "seer-poet"], ["imbas", "illumination"], ["cailleach", "veiled hag"], ["caoin", "keening"], ["ceo", "mist"], ["anam", "soul"], ["slua", "host of the dead"], ["fomor", "giants below the sea"], ["ailm", "fir (ogham A)"], ["uath", "hawthorn (ogham H)"], ["zorge", "be friendly (Enochian)"], ["madriax", "the heavens (Enochian)"], ["vorsg", "over you (Enochian)"], ["goho", "thus says (Enochian)"], ["zacar", "move! (Enochian)"], ["iad", "god (Enochian)"], ["babalon", "the scarlet woman"], ["hekas", "be far, profane ones"], ["abrax", "Abraxas"], ["agla", "AGLA, the notariqon"], ["tetra", "the four letters"], ["sigil", "seal"], ["goetia", "the howling art"], ["azoth", "universal solvent"], ["lumen", "light"], ["nox", "night"], ["umbra", "shadow"], ["aether", "fifth element"], ["ourob", "tail-devourer"], ["thelema", "will"], ["athame", "ritual blade"], ["nigredo", "the blackening"], ["albedo", "the whitening"], ["rubedo", "the reddening"], ["sephir", "emanation"], ["qliph", "the husks"], ["paimon", "a king of the Goetia"], ["vassago", "prince of finding (Goetia)"], ["astaroth", "duke of secrets (Goetia)"], ["belial", "the worthless one (Goetia)"], ["bael", "first king (Goetia)"], ["lilit", "night spirit"]];
+const SUFFIXES=[["mor", "great"], ["nach", "invocatory"], ["roth", "wheel"], ["zael", "angelic ending"], ["thar", "beyond"], ["dun", "fortress"], ["vex", "invocatory"], ["kiel", "angelic ending"], ["gal", "valour"], ["bal", "place (from baile)"], ["cor", "circle"], ["drim", "ridge"], ["finn", "bright"], ["goth", "voice (from guth)"], ["hael", "angelic ending"], ["lir", "sea"], ["mael", "devotee"], ["neth", "invocatory"], ["pra", "invocatory"], ["quor", "invocatory"], ["rin", "secret (from r\u00fan)"], ["sul", "eye (from s\u00fail)"], ["tor", "tower"], ["vash", "invocatory"], ["wyr", "fate (Old English wyrd)"], ["xas", "invocatory"], ["yth", "invocatory"], ["zor", "invocatory"], ["carn", "cairn"], ["loch", "lake"], ["seth", "invocatory"], ["fael", "angelic ending"]];
+const ALGORAND_WORDS="abandon ability able about above absent absorb abstract absurd abuse access accident account accuse achieve acid acoustic acquire across act action actor actress actual adapt add addict address adjust admit adult advance advice aerobic affair afford afraid again age agent agree ahead aim air airport aisle alarm album alcohol alert alien all alley allow almost alone alpha already also alter always amateur amazing among amount amused analyst anchor ancient anger angle angry animal ankle announce annual another answer antenna antique anxiety any apart apology appear apple approve april arch arctic area arena argue arm armed armor army around arrange arrest arrive arrow art artefact artist artwork ask aspect assault asset assist assume asthma athlete atom attack attend attitude attract auction audit august aunt author auto autumn average avocado avoid awake aware away awesome awful awkward axis baby bachelor bacon badge bag balance balcony ball bamboo banana banner bar barely bargain barrel base basic basket battle beach bean beauty because become beef before begin behave behind believe below belt bench benefit best betray better between beyond bicycle bid bike bind biology bird birth bitter black blade blame blanket blast bleak bless blind blood blossom blouse blue blur blush board boat body boil bomb bone bonus book boost border boring borrow boss bottom bounce box boy bracket brain brand brass brave bread breeze brick bridge brief bright bring brisk broccoli broken bronze broom brother brown brush bubble buddy budget buffalo build bulb bulk bullet bundle bunker burden burger burst bus business busy butter buyer buzz cabbage cabin cable cactus cage cake call calm camera camp can canal cancel candy cannon canoe canvas canyon capable capital captain car carbon card cargo carpet carry cart case cash casino castle casual cat catalog catch category cattle caught cause caution cave ceiling celery cement census century cereal certain chair chalk champion change chaos chapter charge chase chat cheap check cheese chef cherry chest chicken chief child chimney choice choose chronic chuckle chunk churn cigar cinnamon circle citizen city civil claim clap clarify claw clay clean clerk clever click client cliff climb clinic clip clock clog close cloth cloud clown club clump cluster clutch coach coast coconut code coffee coil coin collect color column combine come comfort comic common company concert conduct confirm congress connect consider control convince cook cool copper copy coral core corn correct cost cotton couch country couple course cousin cover coyote crack cradle craft cram crane crash crater crawl crazy cream credit creek crew cricket crime crisp critic crop cross crouch crowd crucial cruel cruise crumble crunch crush cry crystal cube culture cup cupboard curious current curtain curve cushion custom cute cycle dad damage damp dance danger daring dash daughter dawn day deal debate debris decade december decide decline decorate decrease deer defense define defy degree delay deliver demand demise denial dentist deny depart depend deposit depth deputy derive describe desert design desk despair destroy detail detect develop device devote diagram dial diamond diary dice diesel diet differ digital dignity dilemma dinner dinosaur direct dirt disagree discover disease dish dismiss disorder display distance divert divide divorce dizzy doctor document dog doll dolphin domain donate donkey donor door dose double dove draft dragon drama drastic draw dream dress drift drill drink drip drive drop drum dry duck dumb dune during dust dutch duty dwarf dynamic eager eagle early earn earth easily east easy echo ecology economy edge edit educate effort egg eight either elbow elder electric elegant element elephant elevator elite else embark embody embrace emerge emotion employ empower empty enable enact end endless endorse enemy energy enforce engage engine enhance enjoy enlist enough enrich enroll ensure enter entire entry envelope episode equal equip era erase erode erosion error erupt escape essay essence estate eternal ethics evidence evil evoke evolve exact example excess exchange excite exclude excuse execute exercise exhaust exhibit exile exist exit exotic expand expect expire explain expose express extend extra eye eyebrow fabric face faculty fade faint faith fall false fame family famous fan fancy fantasy farm fashion fat fatal father fatigue fault favorite feature february federal fee feed feel female fence festival fetch fever few fiber fiction field figure file film filter final find fine finger finish fire firm first fiscal fish fit fitness fix flag flame flash flat flavor flee flight flip float flock floor flower fluid flush fly foam focus fog foil fold follow food foot force forest forget fork fortune forum forward fossil foster found fox fragile frame frequent fresh friend fringe frog front frost frown frozen fruit fuel fun funny furnace fury future gadget gain galaxy gallery game gap garage garbage garden garlic garment gas gasp gate gather gauge gaze general genius genre gentle genuine gesture ghost giant gift giggle ginger giraffe girl give glad glance glare glass glide glimpse globe gloom glory glove glow glue goat goddess gold good goose gorilla gospel gossip govern gown grab grace grain grant grape grass gravity great green grid grief grit grocery group grow grunt guard guess guide guilt guitar gun gym habit hair half hammer hamster hand happy harbor hard harsh harvest hat have hawk hazard head health heart heavy hedgehog height hello helmet help hen hero hidden high hill hint hip hire history hobby hockey hold hole holiday hollow home honey hood hope horn horror horse hospital host hotel hour hover hub huge human humble humor hundred hungry hunt hurdle hurry hurt husband hybrid ice icon idea identify idle ignore ill illegal illness image imitate immense immune impact impose improve impulse inch include income increase index indicate indoor industry infant inflict inform inhale inherit initial inject injury inmate inner innocent input inquiry insane insect inside inspire install intact interest into invest invite involve iron island isolate issue item ivory jacket jaguar jar jazz jealous jeans jelly jewel job join joke journey joy judge juice jump jungle junior junk just kangaroo keen keep ketchup key kick kid kidney kind kingdom kiss kit kitchen kite kitten kiwi knee knife knock know lab label labor ladder lady lake lamp language laptop large later latin laugh laundry lava law lawn lawsuit layer lazy leader leaf learn leave lecture left leg legal legend leisure lemon lend length lens leopard lesson letter level liar liberty library license life lift light like limb limit link lion liquid list little live lizard load loan lobster local lock logic lonely long loop lottery loud lounge love loyal lucky luggage lumber lunar lunch luxury lyrics machine mad magic magnet maid mail main major make mammal man manage mandate mango mansion manual maple marble march margin marine market marriage mask mass master match material math matrix matter maximum maze meadow mean measure meat mechanic medal media melody melt member memory mention menu mercy merge merit merry mesh message metal method middle midnight milk million mimic mind minimum minor minute miracle mirror misery miss mistake mix mixed mixture mobile model modify mom moment monitor monkey monster month moon moral more morning mosquito mother motion motor mountain mouse move movie much muffin mule multiply muscle museum mushroom music must mutual myself mystery myth naive name napkin narrow nasty nation nature near neck need negative neglect neither nephew nerve nest net network neutral never news next nice night noble noise nominee noodle normal north nose notable note nothing notice novel now nuclear number nurse nut oak obey object oblige obscure observe obtain obvious occur ocean october odor off offer office often oil okay old olive olympic omit once one onion online only open opera opinion oppose option orange orbit orchard order ordinary organ orient original orphan ostrich other outdoor outer output outside oval oven over own owner oxygen oyster ozone pact paddle page pair palace palm panda panel panic panther paper parade parent park parrot party pass patch path patient patrol pattern pause pave payment peace peanut pear peasant pelican pen penalty pencil people pepper perfect permit person pet phone photo phrase physical piano picnic picture piece pig pigeon pill pilot pink pioneer pipe pistol pitch pizza place planet plastic plate play please pledge pluck plug plunge poem poet point polar pole police pond pony pool popular portion position possible post potato pottery poverty powder power practice praise predict prefer prepare present pretty prevent price pride primary print priority prison private prize problem process produce profit program project promote proof property prosper protect proud provide public pudding pull pulp pulse pumpkin punch pupil puppy purchase purity purpose purse push put puzzle pyramid quality quantum quarter question quick quit quiz quote rabbit raccoon race rack radar radio rail rain raise rally ramp ranch random range rapid rare rate rather raven raw razor ready real reason rebel rebuild recall receive recipe record recycle reduce reflect reform refuse region regret regular reject relax release relief rely remain remember remind remove render renew rent reopen repair repeat replace report require rescue resemble resist resource response result retire retreat return reunion reveal review reward rhythm rib ribbon rice rich ride ridge rifle right rigid ring riot ripple risk ritual rival river road roast robot robust rocket romance roof rookie room rose rotate rough round route royal rubber rude rug rule run runway rural sad saddle sadness safe sail salad salmon salon salt salute same sample sand satisfy satoshi sauce sausage save say scale scan scare scatter scene scheme school science scissors scorpion scout scrap screen script scrub sea search season seat second secret section security seed seek segment select sell seminar senior sense sentence series service session settle setup seven shadow shaft shallow share shed shell sheriff shield shift shine ship shiver shock shoe shoot shop short shoulder shove shrimp shrug shuffle shy sibling sick side siege sight sign silent silk silly silver similar simple since sing siren sister situate six size skate sketch ski skill skin skirt skull slab slam sleep slender slice slide slight slim slogan slot slow slush small smart smile smoke smooth snack snake snap sniff snow soap soccer social sock soda soft solar soldier solid solution solve someone song soon sorry sort soul sound soup source south space spare spatial spawn speak special speed spell spend sphere spice spider spike spin spirit split spoil sponsor spoon sport spot spray spread spring spy square squeeze squirrel stable stadium staff stage stairs stamp stand start state stay steak steel stem step stereo stick still sting stock stomach stone stool story stove strategy street strike strong struggle student stuff stumble style subject submit subway success such sudden suffer sugar suggest suit summer sun sunny sunset super supply supreme sure surface surge surprise surround survey suspect sustain swallow swamp swap swarm swear sweet swift swim swing switch sword symbol symptom syrup system table tackle tag tail talent talk tank tape target task taste tattoo taxi teach team tell ten tenant tennis tent term test text thank that theme then theory there they thing this thought three thrive throw thumb thunder ticket tide tiger tilt timber time tiny tip tired tissue title toast tobacco today toddler toe together toilet token tomato tomorrow tone tongue tonight tool tooth top topic topple torch tornado tortoise toss total tourist toward tower town toy track trade traffic tragic train transfer trap trash travel tray treat tree trend trial tribe trick trigger trim trip trophy trouble truck true truly trumpet trust truth try tube tuition tumble tuna tunnel turkey turn turtle twelve twenty twice twin twist two type typical ugly umbrella unable unaware uncle uncover under undo unfair unfold unhappy uniform unique unit universe unknown unlock until unusual unveil update upgrade uphold upon upper upset urban urge usage use used useful useless usual utility vacant vacuum vague valid valley valve van vanish vapor various vast vault vehicle velvet vendor venture venue verb verify version very vessel veteran viable vibrant vicious victory video view village vintage violin virtual virus visa visit visual vital vivid vocal voice void volcano volume vote voyage wage wagon wait walk wall walnut want warfare warm warrior wash wasp waste water wave way wealth weapon wear weasel weather web wedding weekend weird welcome west wet whale what wheat wheel when where whip whisper wide width wife wild will win window wine wing wink winner winter wire wisdom wise wish witness wolf woman wonder wood wool word work world worry worth wrap wreck wrestle wrist write wrong yard year yellow you young youth zebra zero zone zoo".split(' ');
+/*
+ * dmnemonic — Algorand keys in the dmnemonic and demonic tongues
+ * Copyright (C) 2026 Professor Codephreak and the cypherpunk4096 contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version. It is distributed WITHOUT ANY WARRANTY; see LICENSE-GPL-3.0.
+ * Client-side component, GPL-3.0-or-later.
+ */
+"use strict";
+// ---- dmnemonic core: bit-identical to dmnemonic.py and algosdk ----
+
+// SHA-512 family. Round constants and IV are derived from prime roots at load.
+const M64 = (1n << 64n) - 1n;
+function primes(n) { const p = []; for (let i = 2; p.length < n; i++) if (p.every(q => i % q)) p.push(i); return p; }
+function iroot(v, k) { // floor(v^(1/k)) for BigInt
+  let x = 1n << BigInt(Math.ceil(v.toString(2).length / k));
+  for (;;) { const y = ((BigInt(k) - 1n) * x + v / x ** BigInt(k - 1)) / BigInt(k); if (y >= x) return x; x = y; }
+}
+const PR = primes(80);
+const K512 = PR.map(p => iroot(BigInt(p) << 192n, 3) & M64);
+const IV512 = PR.slice(0, 8).map(p => iroot(BigInt(p) << 128n, 2) & M64);
+const rotr = (x, n) => ((x >> n) | (x << (64n - n))) & M64;
+
+function sha512core(msg, iv) {
+  const len = msg.length, padLen = ((len + 17 + 127) >> 7) << 7;
+  const b = new Uint8Array(padLen); b.set(msg); b[len] = 0x80;
+  let bits = BigInt(len) * 8n;
+  for (let i = 0; i < 16; i++) { b[padLen - 1 - i] = Number(bits & 255n); bits >>= 8n; }
+  const H = iv.slice(), W = new Array(80);
+  for (let off = 0; off < padLen; off += 128) {
+    for (let t = 0; t < 16; t++) { let w = 0n; for (let j = 0; j < 8; j++) w = (w << 8n) | BigInt(b[off + t * 8 + j]); W[t] = w; }
+    for (let t = 16; t < 80; t++) {
+      const s0 = rotr(W[t - 15], 1n) ^ rotr(W[t - 15], 8n) ^ (W[t - 15] >> 7n);
+      const s1 = rotr(W[t - 2], 19n) ^ rotr(W[t - 2], 61n) ^ (W[t - 2] >> 6n);
+      W[t] = (W[t - 16] + s0 + W[t - 7] + s1) & M64;
+    }
+    let [a, bb, c, d, e, f, g, h] = H;
+    for (let t = 0; t < 80; t++) {
+      const S1 = rotr(e, 14n) ^ rotr(e, 18n) ^ rotr(e, 41n), ch = (e & f) ^ (~e & M64 & g);
+      const T1 = (h + S1 + ch + K512[t] + W[t]) & M64;
+      const S0 = rotr(a, 28n) ^ rotr(a, 34n) ^ rotr(a, 39n), maj = (a & bb) ^ (a & c) ^ (bb & c);
+      h = g; g = f; f = e; e = (d + T1) & M64; d = c; c = bb; bb = a; a = (T1 + S0 + maj) & M64;
+    }
+    [a, bb, c, d, e, f, g, h].forEach((v, i) => { H[i] = (H[i] + v) & M64; });
+  }
+  const out = new Uint8Array(64);
+  H.forEach((v, i) => { for (let j = 0; j < 8; j++) out[i * 8 + j] = Number((v >> BigInt(56 - 8 * j)) & 255n); });
+  return out;
+}
+const sha512 = m => sha512core(m, IV512);
+// SHA-512/t IV generation (FIPS 180-4 §5.3.6): hash "SHA-512/256" under IV512 ^ a5a5…
+const IV512_256 = (() => {
+  const d = sha512core(new TextEncoder().encode("SHA-512/256"), IV512.map(v => v ^ 0xa5a5a5a5a5a5a5a5n));
+  return Array.from({ length: 8 }, (_, i) => d.slice(i * 8, i * 8 + 8).reduce((a, x) => (a << 8n) | BigInt(x), 0n));
+})();
+const sha512_256 = m => sha512core(m, IV512_256).slice(0, 32);
+
+// Lexicons
+const GRIMOIRE_WORDS = ROOTS.flatMap(([r]) => SUFFIXES.map(([s]) => r + s));
+const gloss = i => `${ROOTS[i >> 5][1]} · ${SUFFIXES[i & 31][1]}`;
+function makeLexicon(name, words, prefixMin) {
+  const index = new Map(words.map((w, i) => [w, i])), counts = new Map();
+  for (const w of words) for (let n = prefixMin; n < w.length; n++) counts.set(w.slice(0, n), (counts.get(w.slice(0, n)) || 0) + 1);
+  words.forEach((w, i) => { for (let n = prefixMin; n < w.length; n++) { const p = w.slice(0, n); if (counts.get(p) === 1 && !index.has(p)) index.set(p, i); } });
+  return { name, words, lookup: w => index.get(w), suggest: w => words.reduce((b, c) => lev(w, c) < lev(w, b) ? c : b) };
+}
+function lev(a, b) {
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) cur.push(Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] !== b[j - 1])));
+    prev = cur;
+  }
+  return prev[b.length];
+}
+const ALGORAND = makeLexicon("dmnemonic", ALGORAND_WORDS, 4);
+const GRIMOIRE = makeLexicon("demonic", GRIMOIRE_WORDS, 6);
+
+// Algorand 11-bit little-endian packing
+function to11(data) {
+  let buf = 0, bits = 0; const out = [];
+  for (const b of data) { buf |= b << bits; bits += 8; if (bits >= 11) { out.push(buf & 2047); buf >>>= 11; bits -= 11; } }
+  if (bits) out.push(buf & 2047);
+  return out;
+}
+function from11(nums) {
+  let buf = 0, bits = 0; const out = [];
+  for (const n of nums) { buf |= n << bits; bits += 11; while (bits >= 8) { out.push(buf & 255); buf >>>= 8; bits -= 8; } }
+  if (bits) out.push(buf & 255);
+  return Uint8Array.from(out);
+}
+const cat = (...a) => { const o = new Uint8Array(a.reduce((n, x) => n + x.length, 0)); let i = 0; for (const x of a) { o.set(x, i); i += x.length; } return o; };
+const hdrBytes = h => h == null ? new Uint8Array(0) : Uint8Array.of(h & 255, h >> 8);
+const checksumIndex = d => to11(sha512_256(d).slice(0, 2))[0];
+const KINDS = { 25: [32, false], 26: [32, true] };  // a phrase (ed25519 seed or PQ master), or a coven shard
+const SEAL_VERSION = 1;
+
+function encode(payload, lex, header = null) {
+  const nums = (header == null ? [] : [header]).concat(to11(payload));
+  return nums.map(n => lex.words[n]).concat(lex.words[checksumIndex(cat(hdrBytes(header), payload))]);
+}
+function decode(phrase) {
+  const words = phrase.toLowerCase().replace(/[,\d.]+/g, " ").split(/\s+/).filter(Boolean);
+  if (!KINDS[words.length]) throw new Error(`${words.length} words. Expected 25 (a phrase) or 26 (a coven shard).`);
+  const [nbytes, hasHeader] = KINDS[words.length];
+  let lex = [ALGORAND, GRIMOIRE].find(l => words.every(w => l.lookup(w) !== undefined));
+  if (!lex) {
+    const best = [ALGORAND, GRIMOIRE].reduce((a, b) => words.filter(w => b.lookup(w) !== undefined).length > words.filter(w => a.lookup(w) !== undefined).length ? b : a);
+    const bad = words.filter(w => best.lookup(w) === undefined);
+    throw new Error(`unknown ${best.name} word(s): ` + bad.map(w => `“${w}” (did you mean “${best.suggest(w)}”?)`).join(", "));
+  }
+  const nums = words.map(w => lex.lookup(w));
+  const header = hasHeader ? nums.shift() : null, chk = nums.pop();
+  const raw = from11(nums), payload = raw.slice(0, nbytes);
+  if (raw.slice(nbytes).some(x => x)) throw new Error("checksum failed (non-zero padding bits)");
+  if (checksumIndex(cat(hdrBytes(header), payload)) !== chk) throw new Error("checksum failed — a word is wrong or out of order");
+  return { payload, header, lex };
+}
+
+// Ed25519 public key (RFC 8032)
+const P = (1n << 255n) - 19n;
+const mod = a => ((a % P) + P) % P;
+const powm = (b, e) => { let r = 1n; b = mod(b); while (e) { if (e & 1n) r = r * b % P; b = b * b % P; e >>= 1n; } return r; };
+const D = mod(-121665n * powm(121666n, P - 2n));
+const BX = 15112221349535400772501151409588531511454012693041857206046113283949847762202n;
+const BY = 46316835694926478169428394003475163141307993866256225615783033603165251855960n;
+function ptAdd([x1, y1, z1, t1], [x2, y2, z2, t2]) {
+  const a = mod((y1 - x1) * (y2 - x2)), b = mod((y1 + x1) * (y2 + x2));
+  const c = mod(t1 * 2n * D * t2), d = mod(z1 * 2n * z2);
+  const e = b - a, f = d - c, g = d + c, h = b + a;
+  return [mod(e * f), mod(g * h), mod(f * g), mod(e * h)];
+}
+function ed25519PublicKey(seed) {
+  const h = sha512(seed);
+  let a = 0n; for (let i = 31; i >= 0; i--) a = (a << 8n) | BigInt(h[i]);
+  a &= (1n << 254n) - 8n; a |= 1n << 254n;
+  let r = [0n, 1n, 1n, 0n], p = [BX, BY, 1n, mod(BX * BY)];
+  while (a) { if (a & 1n) r = ptAdd(r, p); p = ptAdd(p, p); a >>= 1n; }
+  const zi = powm(r[2], P - 2n), x = mod(r[0] * zi);
+  let y = mod(r[1] * zi) | ((x & 1n) << 255n);
+  const out = new Uint8Array(32); for (let i = 0; i < 32; i++) { out[i] = Number(y & 255n); y >>= 8n; }
+  return out;
+}
+function base32(bytes) {
+  const A = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"; let bits = 0, v = 0, s = "";
+  for (const b of bytes) { v = (v << 8) | b; bits += 8; while (bits >= 5) { s += A[(v >>> (bits - 5)) & 31]; bits -= 5; } }
+  if (bits) s += A[(v << (5 - bits)) & 31];
+  return s;
+}
+const algorandAddress = pub => base32(cat(pub, sha512_256(pub).slice(-4)));
+const hex = b => Array.from(b, x => x.toString(16).padStart(2, "0")).join("");
+// Algorand native post-quantum accounts (go-algorand #6639, consensus v42):
+// the Falcon-1024 seed is SHA-512/256("PQK" || "f1" || entropy). The PQ address
+// needs Falcon key generation, which this page does not run (see docs/QUANTUM.md).
+const pqFalconSeed = entropy => sha512_256(cat(new TextEncoder().encode("PQKf1"), entropy));
+function describe(payload, pq = false) {
+  if (!pq) { const pub = ed25519PublicKey(payload); return { kind: "Algorand account (ed25519)", address: algorandAddress(pub), pub }; }
+  const id = sha512_256(pqFalconSeed(payload)).slice(0, 8);
+  return { kind: "Algorand PQ account (Falcon-1024, scheme f1)", seedId: hex(id), pub: id };
+}
+
+// Coven: Shamir over GF(256)
+const EXP = new Uint8Array(512), LOG = new Uint8Array(256);
+for (let i = 0, x = 1; i < 255; i++) { EXP[i] = x; LOG[x] = i; x ^= (x << 1) ^ (x & 0x80 ? 0x11b : 0); x &= 255; }
+for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+const gmul = (a, b) => a && b ? EXP[LOG[a] + LOG[b]] : 0;
+const gdiv = (a, b) => a ? EXP[LOG[a] - LOG[b] + 255] : 0;
+const randomBytes = n => crypto.getRandomValues(new Uint8Array(n));
+
+// `coeffs` is only for test vectors; normal use draws them from the CSPRNG.
+function covenSplit(secret, k, n, coeffs = null) {
+  if (!(2 <= k && k <= n && n <= 15)) throw new Error("need 2 ≤ threshold ≤ shards ≤ 15");
+  coeffs = coeffs || Array.from({ length: k - 1 }, () => randomBytes(secret.length));
+  const shards = [];
+  for (let x = 1; x <= n; x++) {
+    const y = secret.map((s, i) => { let acc = 0; for (let c = coeffs.length - 1; c >= 0; c--) acc = gmul(acc ^ coeffs[c][i], x); return acc ^ s; });
+    shards.push({ header: (SEAL_VERSION << 8) | ((k - 1) << 4) | x, y });
+  }
+  return shards;
+}
+function covenBind(shards) {
+  const ks = new Set(shards.map(s => (s.header >> 4) & 15));
+  if (ks.size !== 1) throw new Error("shards come from covens with different thresholds");
+  const k = [...ks][0] + 1, xs = new Map();
+  for (const s of shards) { if (s.header >> 8 !== SEAL_VERSION) throw new Error("unknown seal version"); xs.set(s.header & 15, s.y); }
+  if (xs.size < k) throw new Error(`this coven needs ${k} distinct shards, got ${xs.size}`);
+  const pts = [...xs.entries()].sort((a, b) => a[0] - b[0]);
+  const interp = ps => ps[0][1].map((_, i) => ps.reduce((acc, [xj, yj], j) => {
+    let num = 1, den = 1;
+    ps.forEach(([xm], m) => { if (m !== j) { num = gmul(num, xm); den = gmul(den, xj ^ xm); } });
+    return acc ^ gmul(yj[i], gdiv(num, den));
+  }, 0));
+  const secret = interp(pts.slice(0, k));
+  if (pts.length > k && hex(interp(pts.slice(-k))) !== hex(secret)) throw new Error("surplus shards disagree — they are not from the same coven");
+  return secret;
+}
+function gatherEntropy(n, incantation) {
+  const raw = randomBytes(n);
+  if (!incantation) return raw;
+  return sha512(cat(raw, new TextEncoder().encode("\0incantation\0" + incantation))).slice(0, n);
+}
+
+// Known-answer tests. Vectors are shared with dmnemonic.py and SPEC.md; the
+// ed25519 and Algorand values come from RFC 8032 and algosdk, not from this code.
+const unhex = h => Uint8Array.from(h.match(/../g), x => parseInt(x, 16));
+const VECTORS = {"sha512_256_abc": "53048e2681941ef99b2e29b76b4c7dabe4c2d0c634fc6d46e0e2f13107e7af23", "accounts": [{"seed": "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60", "pub": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a", "address": "25NJQAMCWEFLPVKL73J4SZAHHIHOC4XT3KTCGJNPAINGR5YHKENMEF5QTE", "dmnemonic": "crisp sheriff solution ten remove object chair enhance future rather biology era myth image swap crash coffee scatter buffalo depart day twist advance about unfair", "demonic": "cernunloch aetherfinn thelemator rubedovash azothlir babalonmor dagdahael tuathrin imbasrin goetiapra imbolcquor annwnroth zacarrin sluacor albedoyth cernunquor manannbal umbrazael brigidgoth machator machamor paimoncarn draoifael draoizael vassagogal"}, {"seed": "4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb", "pub": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c", "address": "HVABPQ7IIOEVVEVXBKTU2G36XSOJQLGPF3CJNDGAZVK7CKXUMYGA6EOE6Y", "dmnemonic": "praise case eternal verb combine issue reject senior match element poem rail believe small provide private network hammer edit term panther puppy tag abstract bone", "demonic": "tetrafinn morriganxas annwnfinn astarothrin manannlir fomorsul azothkiel umbraloch vorsgvex geisloch aglawyr goetiakiel imbolcdun thelemazael sigilkiel tetraxas iadvex ceothar geisquor rubedozor hekasseth sigilmael rubedobal draoikiel lughcor"}], "coven": {"seed": "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60", "k": 3, "n": 5, "coeffs": ["202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f", "404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f"], "shards": ["dagdanach fiachloch geismor lilitvash albedokiel fomorbal zorgemor dagdator nuadavash awenrin cernunseth dagdapra tuathpra awenpra ceocor albedoroth awenmael morriganbal dubhlir manannfinn fiachvex baelvex astarothcarn draoikiel draoimor thelemacor", "dagdaroth babalonvex babalonkiel caoinquor vorsgtor nuadazor tuathpra annwnrin manannlir cernunsul caoincarn tetrahael baelseth paimonkiel fiachthar umbrator imbolcyth ogamvex vassagovex babalonxas nuadasul brigidmael mananntor ourobwyr draoizael belialkiel", "dagdazael iadvex lughdrim nemetonpra gohovex paimonloch awenpra annwnfinn annwnfinn fiachsul qliphmael babalonlir lilithael nuadanach dagdathar umbrahael fomorxas sidhevex anamcor tetrawyr mananndun rubedotor badbtor ourobmor draoimor vorsgrin", "dagdathar manannneth nigredoquor aglasul nemetonbal hekasdun lumennach qliphloch mananntor athamethar zacarneth samhainzael fiachpra nigredolir iadsul qliphwyr umbrafinn nemetonvex hekaswyr hekasnach vorsgbal azothpra fiachyth albedothar draoimor umbrasul", "dagdadun morriganneth nemetonfael iadrin awenxas imbaszael abraxnach qliphdun annwnsul rubedothar beltanloch fiachroth macharoth imbolcbal gohosul qliphmor abraxlir filivex brigidrin sigilmor gohoxas fomorrin dagdayth albedocarn draoizael morriganhael"]}, "quantum": {"source": "go-algorand cmd/algokey/pq_test.go TestPQGenerateUsesMnemonicSizedEntropy", "scheme": "f1", "entropy": "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20", "dmnemonic": "dizzy army link gate asthma dragon expect arch pave deal always baby category age post bid actual good minimum script demand shy abstract ability move", "demonic": "dubhnach samhainmor zorgemael cailleachroth samhainmael dubhmael awenroth ogamwyr abraxfinn machanach sidhecarn beltangal dagdanach sidhevex tetradun imbolcmael draoivash caoinzael gohogal umbragoth machaneth aethercarn draoikiel draoinach zacarvex", "falcon_seed": "ff681836d409831e7a16231bfcf1fca8e0a27b17a2389ff76ce1a7232af4609a", "pq_address": "ZEJ4BLG3XWAUUZQGCEDJLYIC6D2NCWHRSX5DJMDPE54PXXR7G3PCQTARXU", "salt": 5}};
+function selfTest() {
+  const fails = [], ok = (name, cond) => { if (!cond) fails.push(name); };
+  const abc = new TextEncoder().encode("abc");
+  try {
+    ok("SHA-512", hex(sha512(abc)).startsWith("ddaf35a193617aba"));
+    ok("SHA-512/256", hex(sha512_256(abc)) === VECTORS.sha512_256_abc);
+    for (const v of VECTORS.accounts) {
+      const seed = unhex(v.seed), pub = ed25519PublicKey(seed);
+      ok("Ed25519", hex(pub) === v.pub);
+      ok("address", algorandAddress(pub) === v.address);
+      ok("dmnemonic", encode(seed, ALGORAND).join(" ") === v.dmnemonic);
+      ok("demonic", encode(seed, GRIMOIRE).join(" ") === v.demonic);
+      ok("decode", hex(decode(v.demonic).payload) === v.seed);
+    }
+    const c = VECTORS.coven, shards = covenSplit(unhex(c.seed), c.k, c.n, c.coeffs.map(unhex));
+    ok("coven split", shards.every((s, i) => encode(s.y, GRIMOIRE, s.header).join(" ") === c.shards[i]));
+    ok("coven bind", hex(covenBind(c.shards.slice(-c.k).map(t => { const d = decode(t); return { header: d.header, y: d.payload }; }))) === c.seed);
+    const q = VECTORS.quantum;
+    ok("PQ phrase", hex(decode(q.demonic).payload) === q.entropy && encode(unhex(q.entropy), ALGORAND).join(" ") === q.dmnemonic);
+    ok("PQ Falcon seed", hex(pqFalconSeed(unhex(q.entropy))) === q.falcon_seed);
+    ok("lexicon", new Set(GRIMOIRE_WORDS).size === 2048 && !GRIMOIRE_WORDS.some(w => ALGORAND.lookup(w) !== undefined));
+    const r1 = randomBytes(64), r2 = randomBytes(64);
+    ok("CSPRNG", hex(r1) !== hex(r2) && new Set(r1).size > 16);
+  } catch (e) { fails.push("exception: " + e.message); }
+  return fails;
+}
+
+</script>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const BUILD = "engine 78c3515fa8f8";
+$("#build").textContent = BUILD;
+
+// ---- status: self-test, network, context ----
+const fails = selfTest();
+const st = $("#st-test");
+if (fails.length) {
+  st.textContent = "self-test FAILED: " + fails.join(", ");
+  st.className = "chip is-bad";
+} else {
+  st.textContent = "self-test passed";
+  st.className = "chip is-good";
+  document.querySelectorAll("#go, #rgo, #sgo, #bgo").forEach(b => { b.disabled = false; });
+}
+function netStatus() {
+  const on = navigator.onLine, c = $("#st-net");
+  c.textContent = on ? "network: online" : "network: offline";
+  c.className = "chip " + (on ? "is-warn" : "is-good");
+  c.title = on ? "For real funds, disconnect first or use the standalone file offline." : "";
+}
+addEventListener("online", netStatus); addEventListener("offline", netStatus); netStatus();
+const local = location.protocol === "file:";
+$("#st-ctx").textContent = local ? "context: local file" : "context: hosted page";
+$("#st-ctx").className = "chip " + (local ? "is-good" : "is-warn");
+$("#st-ctx").title = local ? "" : "Hosted pages are fine for learning and testnet. Generate real keys from the standalone file, offline.";
+
+// ---- secret hygiene ----
+const secretsHeld = [];          // every key-bearing buffer we create, zeroed on banish
+const hold = b => (secretsHeld.push(b), b);
+let veiled = true;
+function applyVeil() {
+  document.body.classList.toggle("veiled", veiled);
+  $("#veil").textContent = veiled ? "Show words" : "Hide words";
+  $("#veil").setAttribute("aria-pressed", String(veiled));
+}
+$("#veil").onclick = () => { veiled = !veiled; applyVeil(); bump(); };
+applyVeil();
+const OUT_INTRO = $("#out").innerHTML;
+function banish(reason) {
+  secretsHeld.forEach(b => b.fill(0)); secretsHeld.length = 0;
+  current = null;
+  $("#out").innerHTML = OUT_INTRO + (reason ? `<p class="hint">${esc(reason)}</p>` : "");
+  ["#rout", "#sout", "#bout"].forEach(s => { $(s).innerHTML = ""; });
+  ["#rin", "#sin", "#bin", "#incant"].forEach(s => { $(s).value = ""; });
+  veiled = true; applyVeil();
+}
+$("#banish").onclick = () => banish("Banished. Key bytes were zeroed and the page cleared.");
+let idle;
+function bump() { clearTimeout(idle); idle = setTimeout(() => { if (secretsHeld.length || $("#rin").value || $("#sin").value || $("#bin").value) banish("Banished after 5 idle minutes."); }, 5 * 60 * 1000); }
+["pointerdown", "keydown"].forEach(e => addEventListener(e, bump, { passive: true })); bump();
+
+async function copySecret(btn, text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    btn.textContent = "Copied · clears in 30s";
+    setTimeout(() => { navigator.clipboard.writeText("").catch(() => {}); btn.textContent = "Copy"; }, 30000);
+  } catch {
+    btn.textContent = "Copy blocked: select the text instead";
+  }
+}
+document.addEventListener("click", e => { const t = e.target.closest("[data-copy]"); if (t) copySecret(t, t.dataset.copy); });
+
+// ---- tabs ----
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.setAttribute("aria-selected", String(x === b)));
+  document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === b.dataset.tab));
+});
+if (/^#(summon|reveal|coven|lore|grimoire)$/.test(location.hash)) document.querySelector(`nav button[data-tab="${location.hash.slice(1)}"]`).click();
+
+let pqMode = false;
+document.querySelectorAll("#mode button").forEach(b => b.onclick = () => {
+  pqMode = b.dataset.v === "pq";
+  document.querySelectorAll("#mode button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  $("#modehint").textContent = !pqMode
+    ? "An Algorand ed25519 account. The dmnemonic imports into Pera, Defly, goal and algosdk. The demonic phrase is the same 25 indices in the grimoire tongue."
+    : "An Algorand native post-quantum master phrase (Falcon-1024, consensus v42). Same 25-word form, different keys. Get its address with tools/pqaddr or algokey pq import. Never import it into an ed25519 wallet.";
+});
+
+// ---- rendering ----
+// The sigil is drawn from the public key (or a hash of the PQ seed), never from the secret.
+function sigil(pubBytes) {
+  const h = sha512(pubBytes), R = 78, C = 85, pts = [];
+  for (let i = 0; i < 13; i++) { const a = (h[i] / 256) * 2 * Math.PI, r = R * (0.35 + 0.65 * (h[i + 13] / 255)); pts.push([C + r * Math.cos(a), C + r * Math.sin(a)]); }
+  const n = 5 + (h[40] % 4), star = [];
+  for (let i = 0; i <= n; i++) { const a = (i * 2 * Math.floor(n / 2) * Math.PI) / n - Math.PI / 2; star.push([C + R * Math.cos(a), C + R * Math.sin(a)]); }
+  const d = ps => "M" + ps.map(p => p.map(v => v.toFixed(1)).join(" ")).join(" L");
+  return `<svg viewBox="0 0 170 170" role="img" aria-label="address sigil"><circle cx="${C}" cy="${C}" r="${R}" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+    <path d="${d(star)}" fill="none" stroke="var(--blood)" stroke-width="1" opacity=".55"/>
+    <path d="${d(pts)}" fill="none" stroke="var(--ember)" stroke-width="1.8" stroke-linejoin="round"/>
+    ${pts.map(p => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.6" fill="var(--rune)"/>`).join("")}</svg>`;
+}
+function wordList(words, lex, withGloss) {
+  return `<ol class="words">${words.map((w, i) => `<li class="${i === words.length - 1 ? "chk" : ""}">${esc(w)}${withGloss ? `<small>${esc(gloss(lex.lookup(w)))}</small>` : ""}</li>`).join("")}</ol>`;
+}
+function identity(payload, pq = false) {
+  const d = describe(payload, pq);
+  const rows = pq
+    ? [["kind", d.kind], ["seed id", d.seedId], ["address", "run tools/pqaddr, or algokey pq import -m \"<dmnemonic phrase>\""]]
+    : [["kind", d.kind], ["address", d.address]];
+  return `<div class="sigil">${sigil(d.pub)}</div>
+    <div class="ident">${rows.map(([k, v]) => `<div class="k">${k}</div><div class="v">${esc(v)}</div>`).join("")}</div>
+    ${pq ? `<div class="warn">Post-quantum master phrase. Never import it into an ed25519 wallet such as Pera or Defly: an ed25519 key used on-chain would expose this entropy to a quantum attacker.</div>` : ""}`;
+}
+const copyBtn = text => `<button class="btn ghost copy" data-copy="${esc(text)}">Copy</button>`;
+function twin(payload, header = null) {
+  const a = encode(payload, ALGORAND, header), g = encode(payload, GRIMOIRE, header);
+  return `<div class="twin">
+    <div class="panel"><div class="row"><h2>dmnemonic</h2>${copyBtn(a.join(" "))}</div><p class="hint">${a.length} words · wallet-compatible</p>${wordList(a, ALGORAND, false)}</div>
+    <div class="panel demonic"><div class="row"><h2>demonic</h2>${copyBtn(g.join(" "))}</div><p class="hint">${g.length} words · grimoire tongue</p>${wordList(g, GRIMOIRE, true)}</div>
+  </div>`;
+}
+const fail = (el, e) => { $(el).innerHTML = `<p class="err">✗ ${esc(e.message)}</p>`; };
+
+// ---- summon + seal ----
+let current = null;
+function quizPositions(len) {
+  const pos = new Set(); const r = randomBytes(16); let i = 0;
+  while (pos.size < 3) pos.add(r[i++] % len);
+  return [...pos].sort((a, b) => a - b);
+}
+$("#go").onclick = () => {
+  const incantation = $("#incant").value;
+  banish();
+  current = hold(gatherEntropy(32, incantation));
+  const len = encode(current, ALGORAND).length, q = quizPositions(len);
+  $("#out").innerHTML = `<div class="panel">${identity(current, pqMode)}</div>${twin(current)}
+    <div class="panel" id="seal">
+      <h2>Seal</h2>
+      <p class="hint">Write the phrase on paper. Then hide the words and type these three from your copy, in either tongue. This catches a missed or misspelled word before you rely on the backup.</p>
+      <div class="quiz">${q.map(p => `<label for="q${p}">word ${p + 1}<input type="text" id="q${p}" data-pos="${p}" autocomplete="off" autocapitalize="off" spellcheck="false"></label>`).join("")}</div>
+      <div class="row"><button class="btn" id="sealgo">Seal</button><span id="sealmsg" class="hint"></span></div>
+    </div>`;
+  $("#sealgo").onclick = () => {
+    if (!current) return;
+    const ag = encode(current, ALGORAND), gg = encode(current, GRIMOIRE);
+    const bad = [...document.querySelectorAll("#seal input")].filter(inp => {
+      const p = +inp.dataset.pos, w = inp.value.trim().toLowerCase();
+      return !(ALGORAND.lookup(w) === ALGORAND.lookup(ag[p]) && w) && !(GRIMOIRE.lookup(w) === GRIMOIRE.lookup(gg[p]) && w);
+    });
+    $("#sealmsg").className = bad.length ? "err" : "ok";
+    $("#sealmsg").textContent = bad.length
+      ? `Word ${bad.map(i => +i.dataset.pos + 1).join(", ")} does not match. Check your copy.`
+      : "Sealed. Your backup matches. Banish the page when you are done.";
+    if (!bad.length) { veiled = true; applyVeil(); }
+  };
+};
+
+// ---- reveal / coven ----
+$("#rgo").onclick = () => {
+  try {
+    const { payload, header, lex } = decode($("#rin").value); hold(payload);
+    if (header != null) {
+      const k = ((header >> 4) & 15) + 1, x = header & 15;
+      $("#rout").innerHTML = `<p class="ok">Valid coven shard #${x} in the ${lex.name} tongue. Any ${k} shards rebuild the key.</p>${twin(payload, header)}`;
+    } else {
+      $("#rout").innerHTML = `<p class="ok">Valid ${lex.name} phrase.</p><div class="panel">${identity(payload, $("#rpq").checked)}</div>${twin(payload)}`;
+    }
+  } catch (e) { fail("#rout", e); }
+};
+$("#sgo").onclick = () => {
+  try {
+    const { payload, header } = decode($("#sin").value); hold(payload);
+    if (header != null) throw new Error("That is already a shard. Paste the full 25-word phrase.");
+    const k = +$("#sk").value, n = +$("#sn").value, lex = $("#st").value === "demonic" ? GRIMOIRE : ALGORAND;
+    const shards = covenSplit(payload, k, n); shards.forEach(s => hold(s.y));
+    $("#sout").innerHTML = `<p class="ok">Coven of ${n}. Any ${k} rebuild the key. Check the address below matches before handing shards out.</p><div class="panel">${identity(payload, $("#spq").checked)}</div>` + shards.map(s => {
+      const t = encode(s.y, lex, s.header).join(" ");
+      return `<div class="shard"><div class="row"><b>shard ${s.header & 15} of ${n}</b>${copyBtn(t)}</div><div class="shard-text">${esc(t)}</div></div>`;
+    }).join("");
+  } catch (e) { fail("#sout", e); }
+};
+$("#bgo").onclick = () => {
+  try {
+    const shards = $("#bin").value.split("\n").map(l => l.trim()).filter(Boolean).map((l, i) => {
+      const d = decode(l); if (d.header == null) throw new Error(`Line ${i + 1} is a full phrase, not a shard.`);
+      return { header: d.header, y: hold(d.payload) };
+    });
+    const secret = hold(covenBind(shards));
+    $("#bout").innerHTML = `<p class="ok">The coven is bound.</p><div class="panel">${identity(secret, $("#bpq").checked)}</div>${twin(secret)}`;
+  } catch (e) { fail("#bout", e); }
+};
+
+// ---- grimoire table ----
+const LEXROWS = GRIMOIRE_WORDS.map((w, i) => [i, w, gloss(i), ALGORAND_WORDS[i]]);
+function drawLex() {
+  const q = $("#lq").value.trim().toLowerCase();
+  const rows = q ? LEXROWS.filter(r => r.some(c => String(c).toLowerCase().includes(q))) : LEXROWS;
+  $("#lt").innerHTML = rows.map(([i, w, g, a]) => `<tr><td class="n">${i}</td><td class="m">${w}</td><td>${esc(g)}</td><td class="m" style="color:var(--muted)">${a}</td></tr>`).join("");
+}
+$("#lq").oninput = drawLex; drawLex();
+</script>
