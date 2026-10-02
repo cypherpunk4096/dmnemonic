@@ -163,11 +163,12 @@ and references.
 | Known-answer self-test (RFC 8032 Ed25519, SHA-512/256, algosdk mnemonic and address, grimoire, coven and PQ vectors) runs at page load and before every `summon`/`split`/`bind`. Any failure disables key creation. | page, CLI |
 | Randomness only from the OS or browser CSPRNG. An incantation is hashed into it and never replaces it. | both |
 | No network: the standalone page's Content-Security-Policy is `default-src 'none'`, and it uses no storage. | page |
-| Words blurred by default. A **Seal** step checks three random words against your paper copy. | page |
+| Words blurred by default. Revealing them takes a **press and hold** and lasts only for a countdown (15, 30 or 60 s). Holding one word peeks at that word alone, and switching apps re-blurs everything. A **Seal** step checks three random words against your paper copy. | page |
 | **Banish** zeroes key buffers and clears the page, and also runs after 5 idle minutes. Clipboard copies are overwritten after 30 s. | page |
 | Inputs disable autocomplete and spellcheck, since some browsers send spellcheck text off-device. | page |
 | PQ entropy is passed to the helper on stdin, never in argv. The helper never prints the private key. | `tools/pqaddr` |
 | Status chips show self-test, network and local-versus-hosted state. | page |
+| Mobile layout: 44 px touch targets, 16 px inputs (no iOS zoom), sticky tabs and a bottom toolbar clear of the safe area. | page |
 
 ## Repository layout
 
@@ -176,6 +177,8 @@ dmnemonic.py            CLI and translator (Python, standard library only)
 dmnemonic.html          standalone offline page (built)
 src/core.js             browser engine: SHA-512/256, Ed25519, packing, coven, self-test
 src/ui.html             page markup, styles and UI logic
+src/head.html           search and sharing metadata for the standalone page
+assets/                 favicon, Apple touch icon, sharing card and their renderer
 build.py                assembles src/ into dmnemonic.html and dist/
 dist/                   page fragment for hosting, and SHA256SUMS
 tools/pqaddr/           Go helper: PQ master entropy → Algorand Falcon-1024 address

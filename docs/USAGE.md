@@ -127,7 +127,9 @@ Open `dmnemonic.html` from disk. Five tabs:
 
 Controls on every tab:
 
-- **Show words / Hide words**: words are blurred by default.
+- **Hold to reveal**: words are blurred by default. Press and hold the button (or hold Space or Enter on it) for about a second to show them. A countdown runs for the time set in **for** (15, 30 or 60 s), then they blur again. Tap the button during the countdown to hide them at once.
+- **Peek**: press and hold a single word or shard to see just that one while you hold it.
+- Switching tabs or apps re-blurs everything immediately.
 - **Banish all**: zeroes the key bytes and clears the page. It also runs after 5 idle minutes.
 - **Copy** buttons put text on the clipboard and overwrite it 30 seconds later.
 
@@ -150,6 +152,30 @@ The page is assembled from `src/`:
 | `dist/SHA256SUMS` | hashes of both outputs |
 
 `build.py` also copies the page into `~/DeltaVerse/pages/` if that directory exists.
+
+The standalone page also gets the search and sharing head from `src/head.html`: description,
+canonical URL, Open Graph and Twitter cards, JSON-LD (`WebApplication`, `SoftwareSourceCode`,
+`BreadcrumbList`), theme colours, the SVG favicon and the Apple touch icon (both inlined as data
+URIs, which the page's CSP allows). URLs point at `https://deltaverse.pythai.net/dmnemonic` by
+default. Set `DMNEMONIC_ORIGIN` to host it elsewhere:
+
+```sh
+DMNEMONIC_ORIGIN=https://example.org ./build.py
+```
+
+The sharing card is served separately, at `<origin>/gfx/og-dmnemonic.png`. Its sources are in
+`assets/`: `favicon.svg`, `og.html`, and `render.py`, which re-renders `og-dmnemonic.png` and
+`apple-touch-icon.png` (development only; it needs Playwright).
+
+## Mobile
+
+The page is laid out for phones from 360 px wide:
+
+- tap targets are at least 44 px tall;
+- inputs use 16 px text, so iOS does not zoom in on focus;
+- the section tabs scroll sideways and stick to the top;
+- **Hold to reveal**, the timer and **Banish all** sit in a bottom bar that clears the home indicator;
+- words show in two columns.
 
 ## Tests
 

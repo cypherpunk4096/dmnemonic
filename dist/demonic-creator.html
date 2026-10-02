@@ -32,6 +32,7 @@
   color-scheme: light;
 }
 * { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.55 var(--serif); }
 .wrap { max-width: 1040px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 72px; }
 header { text-align: center; }
@@ -49,14 +50,15 @@ nav button { font: 600 14px var(--serif); letter-spacing: .12em; text-transform:
   border: 1px solid var(--line); padding: 8px 14px; border-radius: 2px; cursor: pointer; }
 nav button[aria-selected="true"] { color: var(--ink); border-color: var(--blood); background: color-mix(in srgb, var(--blood) 12%, transparent); }
 button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
-section { display: none; } section.on { display: block; }
+/* Tabs hide sections only once JS runs, so crawlers and no-JS readers see every section. */
+.js section { display: none; } .js section.on { display: block; }
 .panel { background: var(--panel); border: 1px solid var(--line); padding: 20px; border-radius: 3px; margin-bottom: 16px; min-width: 0; }
 h2 { font-size: 22px; letter-spacing: .08em; margin: 0 0 10px; font-weight: 600; text-wrap: balance; }
 h3 { font-size: 14px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 20px 0 8px; font-weight: 600; }
 p { max-width: 70ch; }
 .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 label { color: var(--muted); font-size: 15px; }
-input, textarea, select { font: 15px var(--mono); background: var(--well); color: var(--ink); border: 1px solid var(--line); border-radius: 2px; padding: 8px 10px; }
+input, textarea, select { font: 16px var(--mono); background: var(--well); color: var(--ink); border: 1px solid var(--line); border-radius: 2px; padding: 8px 10px; }
 textarea { width: 100%; min-height: 96px; resize: vertical; }
 input[type=number] { width: 70px; }
 input[type=text] { flex: 1 1 220px; min-width: 0; }
@@ -77,7 +79,8 @@ ol.words li::before { content: counter(w); position: absolute; left: 8px; color:
 ol.words li small { display: block; font: italic 13px var(--serif); color: var(--muted); }
 ol.words li.chk { border-color: var(--ember); }
 .demonic ol.words li { color: var(--rune); }
-.veiled ol.words li, .veiled .shard-text { filter: blur(7px); user-select: none; }
+.veiled ol.words li, .veiled .shard-text { filter: blur(7px); user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; cursor: pointer; transition: filter .12s; }
+.veiled ol.words li.peek, .veiled .shard-text.peek { filter: none; }
 .veiled ol.words li::before { filter: none; }
 .hint { color: var(--muted); font-size: 15px; }
 .err { color: var(--blood); font-weight: 600; }
@@ -99,13 +102,46 @@ td.n { font-variant-numeric: tabular-nums; color: var(--muted); }
 .toolbar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-bottom: 12px; }
 footer { text-align: center; color: var(--muted); font-size: 14px; margin-top: 30px; }
 .copy { margin-left: auto; }
+button, .btn, select { min-height: 44px; touch-action: manipulation; }
+.hold { position: relative; overflow: hidden; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.hold .fill { position: absolute; inset: 0; background: color-mix(in srgb, var(--blood) 45%, transparent); transform-origin: left; transform: scaleX(var(--p, 0)); pointer-events: none; }
+.hold .lbl { position: relative; }
+.hold.on .lbl { text-transform: none; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+.hold.on { border-color: var(--ember); color: var(--ember); }
+.toolbar label { font-size: 14px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+footer a, .src a { color: var(--ember); }
+footer p { margin: 6px auto; max-width: none; }
+noscript p { margin: 12px auto; }
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .wrap { padding-block: 14px 110px; }
+  header h1 { font-size: 26px; letter-spacing: .05em; white-space: nowrap; }
+  nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start;
+        margin: 12px -16px 16px; padding: 8px 16px; scroll-snap-type: x proximity; scroll-padding-inline: 16px; scrollbar-width: none; border-bottom: 1px solid var(--line); }
+  nav::-webkit-scrollbar { display: none; }
+  nav button { flex: 0 0 auto; scroll-snap-align: start; }
+  .toolbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; margin: 0; flex-wrap: nowrap; align-items: center;
+             padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); background: var(--panel); border-top: 1px solid var(--line); }
+  .toolbar .btn { font-size: 14px; letter-spacing: .08em; padding-inline: 12px; white-space: nowrap; }
+  .toolbar .hold { flex: 1 1 auto; }
+  .toolbar label { flex: 0 0 auto; }
+  .seg { width: 100%; } .seg button { flex: 1 1 0; }
+  #go, #rgo, #sgo, #bgo { flex: 1 1 100%; }
+  .panel { padding: 16px; }
+  ol.words { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .row h2 { flex: 1 1 auto; }
+  .ident .v { font-size: 13px; }
+}
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
+<script>document.documentElement.classList.add("js")</script>
 
 <div class="wrap">
 <header>
   <h1>⛧ <b class="name">dmnemonic</b> <span>Creator</span> ⛧</h1>
-  <p>Algorand keys in two tongues: the plain <b>dmnemonic</b> and the <b>demonic</b> grimoire of Gaelic roots and summoning names. Both name the same key and the same account.</p>
+  <p>A free, open-source Algorand seed phrase generator that runs offline in your browser. Every key is written in two tongues: the standard 25-word <b>dmnemonic</b> your wallet reads, and a <b>demonic</b> phrase from a grimoire of Gaelic roots and summoning names. Both name the same account. Split keys into k-of-n covens, or forge Falcon-1024 post-quantum master phrases.</p>
+  <noscript><p class="warn">dmnemonic Creator makes keys with JavaScript, entirely on your device. Turn JavaScript on to use it. Everything below explains how it works.</p></noscript>
   <div class="status" aria-live="polite">
     <span class="chip" id="st-test">self-test: running…</span>
     <span class="chip" id="st-net">network: …</span>
@@ -113,18 +149,22 @@ footer { text-align: center; color: var(--muted); font-size: 14px; margin-top: 3
   </div>
 </header>
 
-<nav role="tablist">
-  <button data-tab="summon" aria-selected="true">Summon</button>
-  <button data-tab="reveal" aria-selected="false">Reveal &amp; Translate</button>
-  <button data-tab="coven" aria-selected="false">Coven</button>
-  <button data-tab="lore" aria-selected="false">Lore</button>
-  <button data-tab="grimoire" aria-selected="false">Grimoire</button>
+<nav role="tablist" aria-label="Sections">
+  <button role="tab" aria-controls="summon" data-tab="summon" aria-selected="true">Summon</button>
+  <button role="tab" aria-controls="reveal" data-tab="reveal" aria-selected="false">Reveal &amp; Translate</button>
+  <button role="tab" aria-controls="coven" data-tab="coven" aria-selected="false">Coven</button>
+  <button role="tab" aria-controls="lore" data-tab="lore" aria-selected="false">Lore</button>
+  <button role="tab" aria-controls="grimoire" data-tab="grimoire" aria-selected="false">Grimoire</button>
 </nav>
 
 <div class="toolbar">
-  <button class="btn ghost" id="veil" aria-pressed="true">Show words</button>
+  <button class="btn ghost hold" id="veil" aria-describedby="veilhint"><span class="fill" aria-hidden="true"></span><span class="lbl">Hold to reveal</span></button>
+  <label for="veilsecs">for <select id="veilsecs"><option value="15">15 s</option><option value="30" selected>30 s</option><option value="60">60 s</option></select></label>
   <button class="btn ghost" id="banish">Banish all</button>
+  <span id="veilhint" class="sr">Press and hold for about one second to show the words for the chosen time. Press and hold a single word to peek at it.</span>
 </div>
+
+<main id="main">
 
 <section id="summon" class="on">
   <div class="panel">
@@ -141,7 +181,7 @@ footer { text-align: center; color: var(--muted); font-size: 14px; margin-top: 3
   <div id="out">
     <div class="panel">
       <h2>The ritual</h2>
-      <p class="hint">Summon forges 256 bits from your browser's cryptographic random generator. Words stay blurred until you choose <b>Show words</b>. Write them on paper, then prove it in the <b>Seal</b> step. <b>Banish all</b> wipes everything, and the page does it on its own after 5 idle minutes.</p>
+      <p class="hint">Summon forges 256 bits from your browser's cryptographic random generator. Words stay blurred. Press and hold <b>Hold to reveal</b> to show them for the time you choose, or press and hold one word to peek at just that word. Write them on paper, then prove it in the <b>Seal</b> step. <b>Banish all</b> wipes everything, and the page does it on its own after 5 idle minutes.</p>
       <p class="hint">Nothing here touches the network or browser storage. For real funds, open the standalone file on an offline machine.</p>
     </div>
   </div>
@@ -209,11 +249,11 @@ address     = SHA-512/256("PQA" ‖ "f1" ‖ salt ‖ pk)</div>
     <ul>
       <li>Known-answer self-test at load (RFC 8032 Ed25519, SHA-512/256, Algorand mnemonic and address from algosdk, grimoire and coven vectors). If any check fails, every button that makes or reads keys stays disabled.</li>
       <li>Randomness comes only from <code>crypto.getRandomValues</code>. An incantation is hashed into it and can never replace it.</li>
-      <li>Words are blurred by default. Inputs turn off autocomplete and spellcheck, since some browsers send spellcheck text to a server.</li>
+      <li>Words are blurred by default. Revealing them takes a deliberate press and hold, and they blur again when the timer runs out. Holding one word peeks at that word alone. Inputs turn off autocomplete and spellcheck, since some browsers send spellcheck text to a server.</li>
       <li>No network requests, no storage. Banish zeroes the key bytes and clears the page, and does so on its own after 5 idle minutes.</li>
       <li>The address sigil is drawn from the public key, so showing it reveals nothing secret.</li>
     </ul>
-    <div class="warn">Wallets only understand the dmnemonic tongue. Keep a way to translate back: the standalone file, the Python tool, or a printed grimoire table. Anyone with either phrase, or with <i>k</i> shards, owns the account. This code has not had an external audit.</div>
+    <div class="warn">Wallets only understand the dmnemonic tongue. Keep a way to translate back: the standalone file, the Python tool, or a printed grimoire table. Anyone with either phrase, or with <i>k</i> shards, owns the account. This code has not had an external audit. Read it: <span class="src"><a href="https://github.com/cypherpunk4096/dmnemonic" rel="noopener">github.com/cypherpunk4096/dmnemonic</a></span>.</div>
   </div>
 </section>
 
@@ -224,8 +264,12 @@ address     = SHA-512/256("PQA" ‖ "f1" ‖ salt ‖ pk)</div>
     <div class="lex" style="margin-top:10px"><table><thead><tr><th>#</th><th>word</th><th>meaning</th><th>dmnemonic</th></tr></thead><tbody id="lt"></tbody></table></div>
   </div>
 </section>
+</main>
 
-<footer>Engine: SHA-512/256, Ed25519 and Shamir written inline and checked bit-for-bit against algosdk · <span id="build"></span></footer>
+<footer>
+  <p class="src">Source code: <a href="https://github.com/cypherpunk4096/dmnemonic" rel="noopener">github.com/cypherpunk4096/dmnemonic</a> · client engine GPL-3.0-or-later · backend MIT</p>
+  <p>SHA-512/256, Ed25519 and Shamir written inline and checked bit-for-bit against algosdk · <span id="build"></span></p>
+</footer>
 </div>
 
 <script>
@@ -502,13 +546,58 @@ $("#st-ctx").title = local ? "" : "Hosted pages are fine for learning and testne
 // ---- secret hygiene ----
 const secretsHeld = [];          // every key-bearing buffer we create, zeroed on banish
 const hold = b => (secretsHeld.push(b), b);
-let veiled = true;
+// Words are revealed only by a deliberate press and hold, and only for a countdown.
+let veiled = true, revealTimer = null, revealEnds = 0;
+const HOLD_MS = 900, vb = $("#veil"), vlbl = $("#veil .lbl");
 function applyVeil() {
   document.body.classList.toggle("veiled", veiled);
-  $("#veil").textContent = veiled ? "Show words" : "Hide words";
-  $("#veil").setAttribute("aria-pressed", String(veiled));
+  vb.classList.toggle("on", !veiled);
+  if (veiled) vlbl.textContent = "Hold to reveal";
 }
-$("#veil").onclick = () => { veiled = !veiled; applyVeil(); bump(); };
+function veilNow() { veiled = true; clearInterval(revealTimer); revealTimer = null; applyVeil(); }
+function revealFor(seconds) {
+  veiled = false; applyVeil();
+  revealEnds = Date.now() + seconds * 1000;
+  const tick = () => {
+    const left = Math.ceil((revealEnds - Date.now()) / 1000);
+    if (left <= 0) return veilNow();
+    vlbl.textContent = `Hide · ${left}s`;
+  };
+  clearInterval(revealTimer); tick(); revealTimer = setInterval(tick, 250);
+}
+let holdRaf = 0;
+function holdBegin(e) {
+  bump();
+  if (!veiled) { veilNow(); return; }          // a tap while visible hides at once
+  if (e.cancelable) e.preventDefault();
+  const start = performance.now();
+  const step = now => {
+    const p = Math.min(1, (now - start) / HOLD_MS);
+    vb.style.setProperty("--p", p);
+    if (p < 1) { holdRaf = requestAnimationFrame(step); return; }
+    vb.style.setProperty("--p", 0); holdRaf = 0;
+    revealFor(+$("#veilsecs").value);
+  };
+  cancelAnimationFrame(holdRaf); holdRaf = requestAnimationFrame(step);
+}
+function holdEnd() { cancelAnimationFrame(holdRaf); holdRaf = 0; vb.style.setProperty("--p", 0); }
+vb.addEventListener("pointerdown", holdBegin);
+["pointerup", "pointerleave", "pointercancel"].forEach(t => vb.addEventListener(t, holdEnd));
+vb.addEventListener("keydown", e => { if ((e.key === " " || e.key === "Enter") && !e.repeat) holdBegin(e); });
+vb.addEventListener("keyup", e => { if (e.key === " " || e.key === "Enter") holdEnd(); });
+vb.addEventListener("contextmenu", e => e.preventDefault());
+// Press and hold a single word (or shard) to peek at it while veiled.
+let peeking = null;
+const unpeek = () => { if (peeking) { peeking.classList.remove("peek"); peeking = null; } };
+document.addEventListener("pointerdown", e => {
+  const t = e.target.closest("ol.words li, .shard-text");
+  if (!t || !veiled) return;
+  peeking = t; t.classList.add("peek"); bump();
+});
+["pointerup", "pointercancel"].forEach(t => document.addEventListener(t, unpeek));
+document.addEventListener("pointerout", e => { if (peeking && e.target === peeking && !peeking.contains(e.relatedTarget)) unpeek(); });
+document.addEventListener("contextmenu", e => { if (e.target.closest(".veiled ol.words li, .veiled .shard-text")) e.preventDefault(); });
+document.addEventListener("visibilitychange", () => { if (document.hidden) { unpeek(); veilNow(); } });
 applyVeil();
 const OUT_INTRO = $("#out").innerHTML;
 function banish(reason) {
@@ -517,7 +606,7 @@ function banish(reason) {
   $("#out").innerHTML = OUT_INTRO + (reason ? `<p class="hint">${esc(reason)}</p>` : "");
   ["#rout", "#sout", "#bout"].forEach(s => { $(s).innerHTML = ""; });
   ["#rin", "#sin", "#bin", "#incant"].forEach(s => { $(s).value = ""; });
-  veiled = true; applyVeil();
+  veilNow();
 }
 $("#banish").onclick = () => banish("Banished. Key bytes were zeroed and the page cleared.");
 let idle;
@@ -616,7 +705,7 @@ $("#go").onclick = () => {
     $("#sealmsg").textContent = bad.length
       ? `Word ${bad.map(i => +i.dataset.pos + 1).join(", ")} does not match. Check your copy.`
       : "Sealed. Your backup matches. Banish the page when you are done.";
-    if (!bad.length) { veiled = true; applyVeil(); }
+    if (!bad.length) veilNow();
   };
 };
 

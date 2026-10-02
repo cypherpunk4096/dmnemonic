@@ -9,7 +9,7 @@
   dist/demonic-creator.html    fragment for publishing as a claude.ai Artifact
   ~/DeltaVerse/pages/dmnemonic.html   standalone copy inside the DeltaVerse site
 """
-import hashlib, json, os, pathlib, sys
+import base64, hashlib, json, os, pathlib, sys, urllib.parse
 
 ROOT = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
@@ -23,13 +23,31 @@ version = hashlib.sha256(engine.encode()).hexdigest()[:12]
 fragment = (ROOT / "src/ui.html").read_text()
 fragment = fragment.replace("/*@@CORE@@*/", engine).replace("/*@@BUILD@@*/", f"engine {version}")
 
+# Where the standalone page is served; drives canonical, Open Graph and JSON-LD URLs.
+ORIGIN = os.environ.get("DMNEMONIC_ORIGIN", "https://deltaverse.pythai.net")
+SITE = ORIGIN + "/dmnemonic"
+OG_IMAGE = ORIGIN + "/gfx/og-dmnemonic.png"
+SEO_TITLE = "dmnemonic Creator: Algorand seed phrases and post-quantum keys"
+
+favicon = (ROOT / "assets/favicon.svg").read_text().replace("\n", "").replace('"', "'")
+seo = (ROOT / "src/head.html").read_text()
+for k, v in {
+    "@@SITE@@": SITE, "@@ORIGIN@@": ORIGIN, "@@OG_IMAGE@@": OG_IMAGE,
+    "@@FAVICON_SVG@@": "data:image/svg+xml," + urllib.parse.quote(favicon, safe=" /:=';,"),
+    "@@APPLE_ICON@@": "data:image/png;base64," + base64.b64encode((ROOT / "assets/apple-touch-icon.png").read_bytes()).decode(),
+}.items():
+    seo = seo.replace(k, v)
+assert "@@" not in seo
+
 title_end = fragment.index("</style>") + len("</style>")
 head, body = fragment[:title_end], fragment[title_end:]
+# The artifact keeps its short name; the standalone page gets a search title and the SEO head.
+head = head.replace("<title>dmnemonic Creator</title>", f"<title>{SEO_TITLE}</title>\n{seo}", 1)
 standalone = f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
 {head}

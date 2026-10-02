@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
 <!--
@@ -16,7 +16,94 @@
   version. It is distributed WITHOUT ANY WARRANTY; see LICENSE-GPL-3.0.
   Client-side component, GPL-3.0-or-later.
 -->
-<title>dmnemonic Creator</title>
+<title>dmnemonic Creator: Algorand seed phrases and post-quantum keys</title>
+<!-- SEO and sharing metadata. Injected by build.py into the standalone page only. -->
+<meta name="description" content="Free, open-source Algorand seed phrase generator that runs offline: the 25-word wallet mnemonic or a demonic grimoire phrase, Shamir covens, Falcon-1024 keys.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<link rel="canonical" href="https://deltaverse.pythai.net/dmnemonic">
+<meta name="author" content="Professor Codephreak">
+<meta name="keywords" content="Algorand, mnemonic, seed phrase generator, 25-word mnemonic, BIP-39, Shamir secret sharing, post-quantum, Falcon-1024, offline wallet backup, dmnemonic">
+<meta name="theme-color" content="#0d0a0c" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#efe8dc" media="(prefers-color-scheme: light)">
+<meta name="color-scheme" content="dark light">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-title" content="dmnemonic">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d0a0c'/%3E%3Ccircle cx='32' cy='32' r='25' fill='none' stroke='%23e3a64a' stroke-width='2.5' opacity='.85'/%3E%3Cpath d='M32.00 53.50 L19.36 14.61 L52.45 38.64 L11.55 38.64 L44.64 14.61 Z' fill='none' stroke='%23d23a55' stroke-width='4' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="DELTAVERSE">
+<meta property="og:title" content="dmnemonic Creator: Algorand keys in two tongues">
+<meta property="og:description" content="Offline Algorand seed phrases as the wallet dmnemonic or the demonic grimoire. k-of-n coven sharding. Falcon-1024 post-quantum master phrases. Open source and self-tested.">
+<meta property="og:url" content="https://deltaverse.pythai.net/dmnemonic">
+<meta property="og:image" content="https://deltaverse.pythai.net/gfx/og-dmnemonic.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="dmnemonic Creator: a red inverted pentagram beside grimoire words such as draoimor, druid · great, and morriganlir, phantom queen · sea.">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="dmnemonic Creator: Algorand keys in two tongues">
+<meta name="twitter:description" content="Offline Algorand seed phrases as the wallet dmnemonic or the demonic grimoire, with coven sharding and Falcon-1024 post-quantum phrases.">
+<meta name="twitter:image" content="https://deltaverse.pythai.net/gfx/og-dmnemonic.png">
+<meta name="twitter:image:alt" content="dmnemonic Creator: a red inverted pentagram beside grimoire words.">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": "https://deltaverse.pythai.net/dmnemonic#app",
+      "name": "dmnemonic Creator",
+      "url": "https://deltaverse.pythai.net/dmnemonic",
+      "description": "An offline, in-browser Algorand seed phrase generator. Each key is written as the standard 25-word mnemonic and as a demonic grimoire phrase, can be split into k-of-n Shamir shards, and can be a Falcon-1024 post-quantum master phrase.",
+      "applicationCategory": "SecurityApplication",
+      "applicationSubCategory": "Cryptocurrency key generator",
+      "operatingSystem": "Any modern web browser",
+      "browserRequirements": "Requires JavaScript. Works offline.",
+      "isAccessibleForFree": true,
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "featureList": [
+        "Algorand 25-word mnemonic generation, compatible with algosdk",
+        "Demonic grimoire encoding of the same key",
+        "k-of-n Shamir secret sharing (coven)",
+        "Algorand native post-quantum (Falcon-1024) master phrases",
+        "Known-answer self-test before any key is created",
+        "No network access and no storage"
+      ],
+      "image": "https://deltaverse.pythai.net/gfx/og-dmnemonic.png",
+      "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+      "author": { "@type": "Person", "name": "Professor Codephreak" },
+      "isPartOf": { "@id": "https://deltaverse.pythai.net/#website" }
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "dmnemonic",
+      "codeRepository": "https://github.com/cypherpunk4096/dmnemonic",
+      "programmingLanguage": ["JavaScript", "Python", "Go"],
+      "license": ["https://www.gnu.org/licenses/gpl-3.0.html", "https://opensource.org/license/mit"],
+      "targetProduct": { "@id": "https://deltaverse.pythai.net/dmnemonic#app" }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://deltaverse.pythai.net/#website",
+      "name": "DELTAVERSE",
+      "url": "https://deltaverse.pythai.net/"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "DELTAVERSE", "item": "https://deltaverse.pythai.net/" },
+        { "@type": "ListItem", "position": 2, "name": "Map", "item": "https://deltaverse.pythai.net/map" },
+        { "@type": "ListItem", "position": 3, "name": "dmnemonic Creator", "item": "https://deltaverse.pythai.net/dmnemonic" }
+      ]
+    }
+  ]
+}
+</script>
+
 <style>
 /* Layout: one narrow altar column; the ritual reads top to bottom: summon → seal → share. */
 :root {
@@ -39,6 +126,7 @@
   color-scheme: light;
 }
 * { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.55 var(--serif); }
 .wrap { max-width: 1040px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 72px; }
 header { text-align: center; }
@@ -56,14 +144,15 @@ nav button { font: 600 14px var(--serif); letter-spacing: .12em; text-transform:
   border: 1px solid var(--line); padding: 8px 14px; border-radius: 2px; cursor: pointer; }
 nav button[aria-selected="true"] { color: var(--ink); border-color: var(--blood); background: color-mix(in srgb, var(--blood) 12%, transparent); }
 button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
-section { display: none; } section.on { display: block; }
+/* Tabs hide sections only once JS runs, so crawlers and no-JS readers see every section. */
+.js section { display: none; } .js section.on { display: block; }
 .panel { background: var(--panel); border: 1px solid var(--line); padding: 20px; border-radius: 3px; margin-bottom: 16px; min-width: 0; }
 h2 { font-size: 22px; letter-spacing: .08em; margin: 0 0 10px; font-weight: 600; text-wrap: balance; }
 h3 { font-size: 14px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 20px 0 8px; font-weight: 600; }
 p { max-width: 70ch; }
 .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 label { color: var(--muted); font-size: 15px; }
-input, textarea, select { font: 15px var(--mono); background: var(--well); color: var(--ink); border: 1px solid var(--line); border-radius: 2px; padding: 8px 10px; }
+input, textarea, select { font: 16px var(--mono); background: var(--well); color: var(--ink); border: 1px solid var(--line); border-radius: 2px; padding: 8px 10px; }
 textarea { width: 100%; min-height: 96px; resize: vertical; }
 input[type=number] { width: 70px; }
 input[type=text] { flex: 1 1 220px; min-width: 0; }
@@ -84,7 +173,8 @@ ol.words li::before { content: counter(w); position: absolute; left: 8px; color:
 ol.words li small { display: block; font: italic 13px var(--serif); color: var(--muted); }
 ol.words li.chk { border-color: var(--ember); }
 .demonic ol.words li { color: var(--rune); }
-.veiled ol.words li, .veiled .shard-text { filter: blur(7px); user-select: none; }
+.veiled ol.words li, .veiled .shard-text { filter: blur(7px); user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; cursor: pointer; transition: filter .12s; }
+.veiled ol.words li.peek, .veiled .shard-text.peek { filter: none; }
 .veiled ol.words li::before { filter: none; }
 .hint { color: var(--muted); font-size: 15px; }
 .err { color: var(--blood); font-weight: 600; }
@@ -106,15 +196,48 @@ td.n { font-variant-numeric: tabular-nums; color: var(--muted); }
 .toolbar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-bottom: 12px; }
 footer { text-align: center; color: var(--muted); font-size: 14px; margin-top: 30px; }
 .copy { margin-left: auto; }
+button, .btn, select { min-height: 44px; touch-action: manipulation; }
+.hold { position: relative; overflow: hidden; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.hold .fill { position: absolute; inset: 0; background: color-mix(in srgb, var(--blood) 45%, transparent); transform-origin: left; transform: scaleX(var(--p, 0)); pointer-events: none; }
+.hold .lbl { position: relative; }
+.hold.on .lbl { text-transform: none; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+.hold.on { border-color: var(--ember); color: var(--ember); }
+.toolbar label { font-size: 14px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+footer a, .src a { color: var(--ember); }
+footer p { margin: 6px auto; max-width: none; }
+noscript p { margin: 12px auto; }
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .wrap { padding-block: 14px 110px; }
+  header h1 { font-size: 26px; letter-spacing: .05em; white-space: nowrap; }
+  nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start;
+        margin: 12px -16px 16px; padding: 8px 16px; scroll-snap-type: x proximity; scroll-padding-inline: 16px; scrollbar-width: none; border-bottom: 1px solid var(--line); }
+  nav::-webkit-scrollbar { display: none; }
+  nav button { flex: 0 0 auto; scroll-snap-align: start; }
+  .toolbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; margin: 0; flex-wrap: nowrap; align-items: center;
+             padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); background: var(--panel); border-top: 1px solid var(--line); }
+  .toolbar .btn { font-size: 14px; letter-spacing: .08em; padding-inline: 12px; white-space: nowrap; }
+  .toolbar .hold { flex: 1 1 auto; }
+  .toolbar label { flex: 0 0 auto; }
+  .seg { width: 100%; } .seg button { flex: 1 1 0; }
+  #go, #rgo, #sgo, #bgo { flex: 1 1 100%; }
+  .panel { padding: 16px; }
+  ol.words { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .row h2 { flex: 1 1 auto; }
+  .ident .v { font-size: 13px; }
+}
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
+<script>document.documentElement.classList.add("js")</script>
 
 <div class="wrap">
 <header>
   <h1>⛧ <b class="name">dmnemonic</b> <span>Creator</span> ⛧</h1>
-  <p>Algorand keys in two tongues: the plain <b>dmnemonic</b> and the <b>demonic</b> grimoire of Gaelic roots and summoning names. Both name the same key and the same account.</p>
+  <p>A free, open-source Algorand seed phrase generator that runs offline in your browser. Every key is written in two tongues: the standard 25-word <b>dmnemonic</b> your wallet reads, and a <b>demonic</b> phrase from a grimoire of Gaelic roots and summoning names. Both name the same account. Split keys into k-of-n covens, or forge Falcon-1024 post-quantum master phrases.</p>
+  <noscript><p class="warn">dmnemonic Creator makes keys with JavaScript, entirely on your device. Turn JavaScript on to use it. Everything below explains how it works.</p></noscript>
   <div class="status" aria-live="polite">
     <span class="chip" id="st-test">self-test: running…</span>
     <span class="chip" id="st-net">network: …</span>
@@ -122,18 +245,22 @@ footer { text-align: center; color: var(--muted); font-size: 14px; margin-top: 3
   </div>
 </header>
 
-<nav role="tablist">
-  <button data-tab="summon" aria-selected="true">Summon</button>
-  <button data-tab="reveal" aria-selected="false">Reveal &amp; Translate</button>
-  <button data-tab="coven" aria-selected="false">Coven</button>
-  <button data-tab="lore" aria-selected="false">Lore</button>
-  <button data-tab="grimoire" aria-selected="false">Grimoire</button>
+<nav role="tablist" aria-label="Sections">
+  <button role="tab" aria-controls="summon" data-tab="summon" aria-selected="true">Summon</button>
+  <button role="tab" aria-controls="reveal" data-tab="reveal" aria-selected="false">Reveal &amp; Translate</button>
+  <button role="tab" aria-controls="coven" data-tab="coven" aria-selected="false">Coven</button>
+  <button role="tab" aria-controls="lore" data-tab="lore" aria-selected="false">Lore</button>
+  <button role="tab" aria-controls="grimoire" data-tab="grimoire" aria-selected="false">Grimoire</button>
 </nav>
 
 <div class="toolbar">
-  <button class="btn ghost" id="veil" aria-pressed="true">Show words</button>
+  <button class="btn ghost hold" id="veil" aria-describedby="veilhint"><span class="fill" aria-hidden="true"></span><span class="lbl">Hold to reveal</span></button>
+  <label for="veilsecs">for <select id="veilsecs"><option value="15">15 s</option><option value="30" selected>30 s</option><option value="60">60 s</option></select></label>
   <button class="btn ghost" id="banish">Banish all</button>
+  <span id="veilhint" class="sr">Press and hold for about one second to show the words for the chosen time. Press and hold a single word to peek at it.</span>
 </div>
+
+<main id="main">
 
 <section id="summon" class="on">
   <div class="panel">
@@ -150,7 +277,7 @@ footer { text-align: center; color: var(--muted); font-size: 14px; margin-top: 3
   <div id="out">
     <div class="panel">
       <h2>The ritual</h2>
-      <p class="hint">Summon forges 256 bits from your browser's cryptographic random generator. Words stay blurred until you choose <b>Show words</b>. Write them on paper, then prove it in the <b>Seal</b> step. <b>Banish all</b> wipes everything, and the page does it on its own after 5 idle minutes.</p>
+      <p class="hint">Summon forges 256 bits from your browser's cryptographic random generator. Words stay blurred. Press and hold <b>Hold to reveal</b> to show them for the time you choose, or press and hold one word to peek at just that word. Write them on paper, then prove it in the <b>Seal</b> step. <b>Banish all</b> wipes everything, and the page does it on its own after 5 idle minutes.</p>
       <p class="hint">Nothing here touches the network or browser storage. For real funds, open the standalone file on an offline machine.</p>
     </div>
   </div>
@@ -218,11 +345,11 @@ address     = SHA-512/256("PQA" ‖ "f1" ‖ salt ‖ pk)</div>
     <ul>
       <li>Known-answer self-test at load (RFC 8032 Ed25519, SHA-512/256, Algorand mnemonic and address from algosdk, grimoire and coven vectors). If any check fails, every button that makes or reads keys stays disabled.</li>
       <li>Randomness comes only from <code>crypto.getRandomValues</code>. An incantation is hashed into it and can never replace it.</li>
-      <li>Words are blurred by default. Inputs turn off autocomplete and spellcheck, since some browsers send spellcheck text to a server.</li>
+      <li>Words are blurred by default. Revealing them takes a deliberate press and hold, and they blur again when the timer runs out. Holding one word peeks at that word alone. Inputs turn off autocomplete and spellcheck, since some browsers send spellcheck text to a server.</li>
       <li>No network requests, no storage. Banish zeroes the key bytes and clears the page, and does so on its own after 5 idle minutes.</li>
       <li>The address sigil is drawn from the public key, so showing it reveals nothing secret.</li>
     </ul>
-    <div class="warn">Wallets only understand the dmnemonic tongue. Keep a way to translate back: the standalone file, the Python tool, or a printed grimoire table. Anyone with either phrase, or with <i>k</i> shards, owns the account. This code has not had an external audit.</div>
+    <div class="warn">Wallets only understand the dmnemonic tongue. Keep a way to translate back: the standalone file, the Python tool, or a printed grimoire table. Anyone with either phrase, or with <i>k</i> shards, owns the account. This code has not had an external audit. Read it: <span class="src"><a href="https://github.com/cypherpunk4096/dmnemonic" rel="noopener">github.com/cypherpunk4096/dmnemonic</a></span>.</div>
   </div>
 </section>
 
@@ -233,8 +360,12 @@ address     = SHA-512/256("PQA" ‖ "f1" ‖ salt ‖ pk)</div>
     <div class="lex" style="margin-top:10px"><table><thead><tr><th>#</th><th>word</th><th>meaning</th><th>dmnemonic</th></tr></thead><tbody id="lt"></tbody></table></div>
   </div>
 </section>
+</main>
 
-<footer>Engine: SHA-512/256, Ed25519 and Shamir written inline and checked bit-for-bit against algosdk · <span id="build"></span></footer>
+<footer>
+  <p class="src">Source code: <a href="https://github.com/cypherpunk4096/dmnemonic" rel="noopener">github.com/cypherpunk4096/dmnemonic</a> · client engine GPL-3.0-or-later · backend MIT</p>
+  <p>SHA-512/256, Ed25519 and Shamir written inline and checked bit-for-bit against algosdk · <span id="build"></span></p>
+</footer>
 </div>
 
 <script>
@@ -511,13 +642,58 @@ $("#st-ctx").title = local ? "" : "Hosted pages are fine for learning and testne
 // ---- secret hygiene ----
 const secretsHeld = [];          // every key-bearing buffer we create, zeroed on banish
 const hold = b => (secretsHeld.push(b), b);
-let veiled = true;
+// Words are revealed only by a deliberate press and hold, and only for a countdown.
+let veiled = true, revealTimer = null, revealEnds = 0;
+const HOLD_MS = 900, vb = $("#veil"), vlbl = $("#veil .lbl");
 function applyVeil() {
   document.body.classList.toggle("veiled", veiled);
-  $("#veil").textContent = veiled ? "Show words" : "Hide words";
-  $("#veil").setAttribute("aria-pressed", String(veiled));
+  vb.classList.toggle("on", !veiled);
+  if (veiled) vlbl.textContent = "Hold to reveal";
 }
-$("#veil").onclick = () => { veiled = !veiled; applyVeil(); bump(); };
+function veilNow() { veiled = true; clearInterval(revealTimer); revealTimer = null; applyVeil(); }
+function revealFor(seconds) {
+  veiled = false; applyVeil();
+  revealEnds = Date.now() + seconds * 1000;
+  const tick = () => {
+    const left = Math.ceil((revealEnds - Date.now()) / 1000);
+    if (left <= 0) return veilNow();
+    vlbl.textContent = `Hide · ${left}s`;
+  };
+  clearInterval(revealTimer); tick(); revealTimer = setInterval(tick, 250);
+}
+let holdRaf = 0;
+function holdBegin(e) {
+  bump();
+  if (!veiled) { veilNow(); return; }          // a tap while visible hides at once
+  if (e.cancelable) e.preventDefault();
+  const start = performance.now();
+  const step = now => {
+    const p = Math.min(1, (now - start) / HOLD_MS);
+    vb.style.setProperty("--p", p);
+    if (p < 1) { holdRaf = requestAnimationFrame(step); return; }
+    vb.style.setProperty("--p", 0); holdRaf = 0;
+    revealFor(+$("#veilsecs").value);
+  };
+  cancelAnimationFrame(holdRaf); holdRaf = requestAnimationFrame(step);
+}
+function holdEnd() { cancelAnimationFrame(holdRaf); holdRaf = 0; vb.style.setProperty("--p", 0); }
+vb.addEventListener("pointerdown", holdBegin);
+["pointerup", "pointerleave", "pointercancel"].forEach(t => vb.addEventListener(t, holdEnd));
+vb.addEventListener("keydown", e => { if ((e.key === " " || e.key === "Enter") && !e.repeat) holdBegin(e); });
+vb.addEventListener("keyup", e => { if (e.key === " " || e.key === "Enter") holdEnd(); });
+vb.addEventListener("contextmenu", e => e.preventDefault());
+// Press and hold a single word (or shard) to peek at it while veiled.
+let peeking = null;
+const unpeek = () => { if (peeking) { peeking.classList.remove("peek"); peeking = null; } };
+document.addEventListener("pointerdown", e => {
+  const t = e.target.closest("ol.words li, .shard-text");
+  if (!t || !veiled) return;
+  peeking = t; t.classList.add("peek"); bump();
+});
+["pointerup", "pointercancel"].forEach(t => document.addEventListener(t, unpeek));
+document.addEventListener("pointerout", e => { if (peeking && e.target === peeking && !peeking.contains(e.relatedTarget)) unpeek(); });
+document.addEventListener("contextmenu", e => { if (e.target.closest(".veiled ol.words li, .veiled .shard-text")) e.preventDefault(); });
+document.addEventListener("visibilitychange", () => { if (document.hidden) { unpeek(); veilNow(); } });
 applyVeil();
 const OUT_INTRO = $("#out").innerHTML;
 function banish(reason) {
@@ -526,7 +702,7 @@ function banish(reason) {
   $("#out").innerHTML = OUT_INTRO + (reason ? `<p class="hint">${esc(reason)}</p>` : "");
   ["#rout", "#sout", "#bout"].forEach(s => { $(s).innerHTML = ""; });
   ["#rin", "#sin", "#bin", "#incant"].forEach(s => { $(s).value = ""; });
-  veiled = true; applyVeil();
+  veilNow();
 }
 $("#banish").onclick = () => banish("Banished. Key bytes were zeroed and the page cleared.");
 let idle;
@@ -625,7 +801,7 @@ $("#go").onclick = () => {
     $("#sealmsg").textContent = bad.length
       ? `Word ${bad.map(i => +i.dataset.pos + 1).join(", ")} does not match. Check your copy.`
       : "Sealed. Your backup matches. Banish the page when you are done.";
-    if (!bad.length) { veiled = true; applyVeil(); }
+    if (!bad.length) veilNow();
   };
 };
 

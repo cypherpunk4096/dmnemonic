@@ -54,7 +54,7 @@ Choose the reading **before** you summon, because it decides how the phrase may 
 An **incantation** is optional. Any text you type is hashed into the system randomness. It can add
 entropy but never replace it, so a memorable phrase is safe to add and useless on its own.
 
-The page shows the words blurred. Choose **Show words** when nobody can see your screen.
+The page shows the words blurred. When nobody can see your screen, press and hold **Hold to reveal** for about a second. The words stay visible for the time you chose (15, 30 or 60 seconds), then blur again. To copy one word at a time, press and hold just that word: it shows only while your finger or mouse button is down. Switching to another app or tab blurs everything at once.
 
 ## 5. Write
 
